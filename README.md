@@ -54,23 +54,17 @@ Deployment configuration:
 - Theme: `.streamlit/config.toml` and `assets/style.css`
 
 Updates pushed to `main` are picked up by the connected Streamlit deployment.
-Hosting the app does not enable AI generation or code execution; those
-integrations remain unconnected.
 
 ## Integration status
 
-**No submitted code is executed. No AI provider or execution runner is connected.**
-The default button reports this status. Selecting the sample checkbox displays
-fixed illustrative data unrelated to the submitted solution, not a real result.
+- **Secure Execution Runner**: Connected and active (`casecracker/runner.py`). Uses native macOS Seatbelt sandboxing (`sandbox-exec`), network denial, isolated ephemeral filesystem, POSIX CPU/file-size resource limits, AST pre-execution verification, and strict execution timeouts.
+- **AI Test Generation**: Boundary stubbed in `casecracker/ai.py` (ready for Gemini/LLM provider integration). The runner automatically extracts examples from problem statements or accepts custom test inputs.
 
-- `app.py`: Streamlit UI and input validation.
-- `casecracker/ui.py`: results panel presentation and downloads.
-- `casecracker/ai.py`: AI test suggestion boundary (currently a stub).
-- `casecracker/execution.py`: execution boundary (currently a stub).
-- `casecracker/models.py`: shared result types.
-- `casecracker/samples.py`: explicitly synthetic preview data.
-
-To integrate real testing, connect an AI provider and an isolated, resource-limited
-runner through these modules. Only report execution after receiving actual runner
-results, and only report a failing test after checking output against a trusted
-expected answer.
+- `app.py`: Streamlit UI, live runner status, workspace, and test execution.
+- `casecracker/runner.py`: Secure sandboxed Python execution engine with OS-level isolation.
+- `casecracker/execution.py`: Execution boundary coordinating test case matching and output comparison.
+- `casecracker/ui.py`: Results panel presentation, comparison diffs, and JSON download.
+- `casecracker/models.py`: Shared result types.
+- `casecracker/ai.py`: AI test suggestion boundary (ready for AI provider).
+- `casecracker/samples.py`: Explicitly synthetic preview data for UI testing.
+- `tests/test_runner.py`: Test suite verifying security constraints, timeouts, and execution correctness.

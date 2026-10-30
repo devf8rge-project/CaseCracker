@@ -19,3 +19,8 @@ class SearchResult:
     test_input: str | None = None
     expected_output: str | None = None
     actual_output: str | None = None
+    passed: bool | None = None
+    execution_time_ms: float | None = None
+    error: str | None = None
+    sandboxed: bool = False
+
