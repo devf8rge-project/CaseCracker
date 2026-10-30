@@ -48,3 +48,5 @@ a { color: #9bb1ff; }
 ::selection { background: var(--lime); color: var(--midnight); }
 @media (max-width: 768px) { .block-container { padding: 1.5rem 1rem; } .topbar { align-items: flex-start; flex-direction: column; } .nav-links { gap: 1.4rem; font-size: .8rem; } .hero { padding-top: 2.5rem; } .guide-grid { grid-template-columns: 1fr; } .workspace-heading h2 { font-size: 1.4rem; } .empty-result { min-height: 350px; } }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } button { transition: none !important; } }
+
+.brand-logo { flex-shrink: 0; display: block; }

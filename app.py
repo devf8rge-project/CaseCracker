@@ -1,5 +1,6 @@
 """CaseCracker frontend. Execution and AI live in separate modules."""
 from pathlib import Path
+import base64
 
 import streamlit as st
 
@@ -28,8 +29,9 @@ def clear_workspace():
 
 st.set_page_config(page_title="CaseCracker · Find your edge case", page_icon="🔎", layout="wide")
 st.markdown(f"<style>{(Path(__file__).parent / 'assets/style.css').read_text()}</style>", unsafe_allow_html=True)
-st.markdown('''<nav class="topbar" aria-label="Main navigation">
-<a class="brand" href="#home"><span class="brand-icon">⌘</span> CaseCracker<span class="beta">PREVIEW</span></a>
+logo_data = base64.b64encode((Path(__file__).parent / "assets/logo.svg").read_bytes()).decode("ascii")
+st.markdown(f'''<nav class="topbar" aria-label="Main navigation">
+<a class="brand" href="#home"><img class="brand-logo" src="data:image/svg+xml;base64,{logo_data}" alt="" width="38" height="38"> CaseCracker<span class="beta">PREVIEW</span></a>
 <div class="nav-links"><a href="#workspace">Workspace</a><a href="#guide">How it works ↗</a>
 <a href="https://github.com/devf8rge-project/CaseCracker" target="_blank" rel="noopener noreferrer">GitHub ↗</a></div></nav>
 <section class="hero" id="home"><div class="eyebrow"><span class="dot"></span> THE EDGE CASE WORKSPACE</div>
@@ -77,8 +79,8 @@ with results:
         st.caption("Good edge cases start at the boundaries of the problem’s valid inputs.")
         st.markdown('<div class="edge-tags"><span>Minimum size</span><span>Repeated values</span><span>Zero & negatives</span><span>Upper limits</span></div>', unsafe_allow_html=True)
 
-st.markdown('''<section id="guide" class="guide"><div class="eyebrow">A LITTLE METHOD. A LOT OF CLARITY.</div><h2>From problem to perspective.</h2><div class="guide-grid">
+st.markdown(f'''<section id="guide" class="guide"><div class="eyebrow">A LITTLE METHOD. A LOT OF CLARITY.</div><h2>From problem to perspective.</h2><div class="guide-grid">
 <article><span>01</span><h3>Set the scene</h3><p>Describe the goal, constraints, and exactly what a correct answer looks like.</p></article>
 <article><span>02</span><h3>Bring your logic</h3><p>Paste a complete Python script. Load the example to explore the interface.</p></article>
 <article><span>03</span><h3>Read the evidence</h3><p>Preview the sample panel today. Verified failing tests need a connected runner and trusted expected answers.</p></article>
-</div></section><footer><div class="brand">⌘ CaseCracker</div><span>Stay curious. Check the boundaries.</span><span>Frontend preview · No code execution</span></footer>''', unsafe_allow_html=True)
+</div></section><footer><div class="brand"><img class="brand-logo" src="data:image/svg+xml;base64,{logo_data}" alt="" width="32" height="32"> CaseCracker</div><span>Stay curious. Check the boundaries.</span><span>Frontend preview · No code execution</span></footer>''', unsafe_allow_html=True)
