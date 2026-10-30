@@ -7,8 +7,29 @@ def reset_editor_instance():
     st.session_state.editor_revision = st.session_state.get("editor_revision", 0) + 1
 
 
+def import_python():
+    uploaded = st.session_state.get("python_upload")
+    if uploaded is None:
+        return
+    try:
+        if uploaded.size > 200_000:
+            raise ValueError("Choose a Python file smaller than 200 KB.")
+        code = uploaded.getvalue().decode("utf-8-sig")
+    except (UnicodeDecodeError, ValueError) as error:
+        st.session_state.upload_error = str(error)
+        return
+    st.session_state.code = code
+    st.session_state.pop("upload_error", None)
+    st.session_state.pop("result", None)
+    reset_editor_instance()
+
+
 def render_editor() -> None:
     st.markdown("**Python code**")
+    with st.expander("Upload a Python file"):
+        st.file_uploader("Choose a .py file", type=["py"], key="python_upload", on_change=import_python, help="UTF-8, up to 200 KB. Selecting a file replaces the editor contents; it does not run the file.")
+        if st.session_state.get("upload_error"):
+            st.error(st.session_state.upload_error)
     with st.expander("Editor settings"):
         font_size = st.select_slider("Font size", options=[12, 14, 16, 18, 20], value=14)
         wrap = st.checkbox("Wrap long lines", value=True)
