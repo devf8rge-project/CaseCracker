@@ -12,6 +12,23 @@ python -m pip install -r requirements.txt
 python -m streamlit run app.py
 ```
 
+## Deployment
+
+The app is hosted on Streamlit Community Cloud (deployment reported by the
+project owner). The public app URL has not yet been added to this README.
+
+Deployment configuration:
+
+- Repository: `devf8rge-project/CaseCracker`
+- Branch: `main`
+- Main file: `app.py`
+- Dependencies: `requirements.txt`
+- Theme: `.streamlit/config.toml` and `assets/style.css`
+
+Updates pushed to `main` are picked up by the connected Streamlit deployment.
+Hosting the app does not enable AI generation or code execution; those
+integrations remain unconnected.
+
 ## Integration status
 
 **No submitted code is executed. No AI provider or execution runner is connected.**
