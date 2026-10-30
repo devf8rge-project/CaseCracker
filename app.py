@@ -6,7 +6,6 @@ import streamlit as st
 
 from casecracker.ai import suggest_test
 from casecracker.editor import render_editor
-from casecracker.drafts import render_drafts
 from casecracker.examples import DEMO_EXAMPLE
 from casecracker.execution import find_failing_test
 from casecracker.samples import sample_result
@@ -57,7 +56,6 @@ with workspace:
     with st.container(border=True):
         st.text_area("Problem statement", key="problem", height=190, placeholder="What should the program do? Include input/output format, constraints, and examples.", help="Include boundary values and the expected behavior for unusual inputs.")
         render_editor()
-        render_drafts()
         st.checkbox("Show temporary sample results (illustration only)", key="preview", help="Displays fixed demo data, not a test of your code.")
         submitted = st.button("Find failing test →", type="primary", use_container_width=True)
         st.caption("No execution in preview mode. Samples are unrelated to your submission.")
