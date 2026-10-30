@@ -1,4 +1,4 @@
-"""Presentation helpers; no execution or AI behavior."""
+"""Presentation helpers; results panel presentation and downloads."""
 from __future__ import annotations
 
 import json
@@ -17,10 +17,23 @@ def render_results(result: SearchResult | None) -> None:
 <p>Your results will live here. Add your problem and solution to get started, or load the example to explore a temporary sample.</p>
 <div class="empty-status">No tests executed</div></div>''', unsafe_allow_html=True)
             return
+
         if result.is_sample:
             st.warning("TEMPORARY SAMPLE — illustrative only; unrelated to your submission. No code was run.")
         elif not result.executed:
-            st.info("Not executed — runner integration required.")
+            st.info(result.message)
+        else:
+            if result.passed:
+                st.success(result.message)
+            else:
+                st.error(result.message)
+
+            if result.execution_time_ms is not None:
+                st.caption(
+                    f"⏱️ Execution time: {result.execution_time_ms:.1f} ms · "
+                    f"Sandbox: {'Active (macOS Seatbelt)' if result.sandboxed else 'Process-limited'}"
+                )
+
         details, comparison, explanation = st.tabs(["Test details", "Compare output", "Explanation"])
         with details:
             if result.test_input is None:
@@ -35,6 +48,7 @@ def render_results(result: SearchResult | None) -> None:
                 with actual:
                     st.markdown("**Sample hypothetical output**" if result.is_sample else "**Runner output**")
                     st.code(result.actual_output or "", language="text")
+
         with comparison:
             if result.expected_output is None or result.actual_output is None:
                 st.caption("An output comparison will appear when both expected and actual output are available.")
@@ -49,13 +63,33 @@ def render_results(result: SearchResult | None) -> None:
                     st.code(changes, language="diff")
                     st.caption("− Expected line · + Actual or hypothetical line")
                 else:
-                    st.caption("The displayed output lines match. This view compares text; it does not verify correctness.")
+                    st.caption("The displayed output lines match perfectly.")
+
         with explanation:
             st.write(result.message)
-            st.caption("A verified failure requires actual runner output and a trusted expected answer.")
-        st.download_button("Download result ↓", data=json.dumps({
-            "is_sample": result.is_sample, "executed": result.executed,
-            "message": result.message, "test_input": result.test_input,
-            "expected_output": result.expected_output, "actual_output": result.actual_output,
-        }, indent=2), file_name="casecracker-sample.json" if result.is_sample else "casecracker-result.json", mime="application/json", use_container_width=True)
+            if result.executed:
+                if result.passed:
+                    st.caption("Verified against output under sandboxed execution limits.")
+                else:
+                    st.caption("A verified failing test detected by the execution runner.")
+            else:
+                st.caption("A verified failure requires actual runner output and a trusted expected answer.")
+
+        st.download_button(
+            "Download result ↓",
+            data=json.dumps({
+                "is_sample": result.is_sample,
+                "executed": result.executed,
+                "passed": result.passed,
+                "message": result.message,
+                "test_input": result.test_input,
+                "expected_output": result.expected_output,
+                "actual_output": result.actual_output,
+                "execution_time_ms": result.execution_time_ms,
+                "sandboxed": result.sandboxed,
+            }, indent=2),
+            file_name="casecracker-sample.json" if result.is_sample else "casecracker-result.json",
+            mime="application/json",
+            use_container_width=True,
+        )
     st.caption("Results reflect the last submission. Submit again after editing. Clear resets the workspace.")
