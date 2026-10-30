@@ -10,7 +10,9 @@ results panel and an optional, clearly labeled temporary sample preview.
 Midnight black, electric cobalt blue, and acid lime styling with a responsive
 workspace, section navigation, and an input guide. Load example fills an
 illustrative problem and buggy solution and enables sample mode; Clear resets
-the workspace. A syntax preview shows saved Python code with line numbers.
+the workspace. The Python editor provides syntax highlighting, line numbers,
+four-space indentation, and automatic edit syncing. A basic text editor is
+available as an alternative. The editor only edits text and does not run code.
 Results include test details, an explanation tab, and a JSON download that
 preserves the sample and execution status flags.
 

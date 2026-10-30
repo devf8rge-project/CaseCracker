@@ -4,6 +4,7 @@ from pathlib import Path
 import streamlit as st
 
 from casecracker.ai import suggest_test
+from casecracker.editor import render_editor
 from casecracker.execution import find_failing_test
 from casecracker.samples import sample_result
 from casecracker.ui import render_results
@@ -14,11 +15,13 @@ EXAMPLE_CODE = "# Demo solution with an intentional bug: ignores negative number
 
 def load_example():
     st.session_state.update(problem=EXAMPLE_PROBLEM, code=EXAMPLE_CODE, preview=True)
+    st.session_state.editor_revision = st.session_state.get("editor_revision", 0) + 1
     st.session_state.pop("result", None)
 
 
 def clear_workspace():
     st.session_state.update(problem="", code="", preview=False)
+    st.session_state.editor_revision = st.session_state.get("editor_revision", 0) + 1
     st.session_state.pop("result", None)
 
 
@@ -44,11 +47,11 @@ with workspace:
         st.button("Load example", on_click=load_example, use_container_width=True)
     with clear_action:
         st.button("Clear", on_click=clear_workspace, use_container_width=True)
-    with st.form("casecracker"):
+    with st.container(border=True):
         st.text_area("Problem statement", key="problem", height=190, placeholder="What should the program do? Include input/output format, constraints, and examples.", help="Include boundary values and the expected behavior for unusual inputs.")
-        st.text_area("Python code", key="code", height=300, placeholder="# Paste your complete Python solution here…", help="Use a standalone script that reads from standard input and prints its answer.")
+        render_editor()
         st.checkbox("Show temporary sample results (illustration only)", key="preview", help="Displays fixed demo data, not a test of your code.")
-        submitted = st.form_submit_button("Find failing test →", type="primary", use_container_width=True)
+        submitted = st.button("Find failing test →", type="primary", use_container_width=True)
         st.caption("No execution in preview mode. Samples are unrelated to your submission.")
     if submitted:
         st.session_state.pop("result", None)
@@ -59,9 +62,6 @@ with workspace:
         else:
             suggestion = suggest_test(st.session_state.problem, st.session_state.code)
             st.session_state.result = find_failing_test(st.session_state.problem, st.session_state.code, suggestion)
-    with st.expander("Syntax preview · last submitted code"):
-        st.caption("A formatted view of the current saved editor contents; this does not execute code.")
-        st.code(st.session_state.get("code") or "# Your code preview will appear here.", language="python", line_numbers=True)
 
 with results:
     st.markdown('<div class="panel-label results-label">02 &nbsp; / &nbsp; TEST INSIGHTS</div>', unsafe_allow_html=True)
