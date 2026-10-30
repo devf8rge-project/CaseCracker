@@ -23,9 +23,14 @@ of the problem or solution entered; they are not generated test results.
 
 Additional workspace tools:
 
+- Editor updates run independently of the surrounding page to avoid full-page
+  reruns while typing. Buttons have short hover/press feedback, and Clear offers
+  an Undo action. Server actions still depend on network and execution time.
 - A brief opening animation shows decorative code over the blurred website,
-  then splits outward to reveal the page. It plays once per tab session, offers
-  Skip and Escape dismissal, and is bypassed for reduced-motion preferences.
+  then splits outward to reveal the page in about one second. It replays on
+  page refresh, but not on ordinary widget updates. Clicking, scrolling, typing,
+  or choosing Skip dismisses it immediately; reduced-motion preferences bypass
+  it entirely. The overlay does not block interaction with the page.
 - Appearance switches between dark and light palettes, including the Python
   editor. The choice is stored in the URL's `theme` parameter so refreshing the
   same page preserves it. A fresh URL without a theme defaults to dark.

@@ -4,15 +4,9 @@
   // This iframe only supplies presentation; it never runs submitted Python.
   let host, win;
   try { win = window.parent; host = win.document; } catch (_) { return; }
-  const storageKey = 'casecracker.intro.v1';
-  try {
-    if (win.sessionStorage.getItem(storageKey)) return;
-    win.sessionStorage.setItem(storageKey, 'seen');
-  } catch (_) {
-    // If session storage is unavailable, avoid repeating the intro on reruns.
-    if (win.__casecrackerIntroSeen) return;
-    win.__casecrackerIntroSeen = true;
-  }
+  // Window lifetime follows page loads: refresh replays; widget reruns do not.
+  if (win.__casecrackerIntroSeen) return;
+  win.__casecrackerIntroSeen = true;
   if (win.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   if (host.getElementById('cc-intro')) return;
 
@@ -20,23 +14,23 @@
   style.id = 'cc-intro-style';
   style.textContent = `
     #cc-intro { position: fixed; inset: 0; z-index: 1000000; display: grid;
-      place-items: center; overflow: hidden; background: rgba(10,16,32,.12);
-      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-      animation: cc-intro-clear .65s ease 1.5s forwards; }
+      place-items: center; overflow: hidden; pointer-events: none; background: rgba(10,16,32,.12);
+      backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+      animation: cc-intro-clear .4s ease .65s forwards; }
     #cc-intro .cc-code-stage { position: relative; width: min(720px, 92vw); height: 320px; }
     #cc-intro .cc-code-half { position: absolute; inset: 0; display: grid;
       align-content: center; padding: 1.5rem; background: transparent;
-      animation: cc-intro-left .85s cubic-bezier(.65,0,.3,1) 1.2s forwards; }
+      animation: cc-intro-left .6s cubic-bezier(.22,1,.36,1) .4s forwards; }
     #cc-intro .cc-code-half:last-child { clip-path: inset(0 0 0 50%);
       animation-name: cc-intro-right; }
     #cc-intro .cc-code-half:first-child { clip-path: inset(0 50% 0 0); }
     #cc-intro pre { margin: 0; padding: 0; color: #edf2ff; background: transparent;
       font: 600 clamp(14px, 2.7vw, 24px)/1.9 ui-monospace, SFMono-Regular, Consolas, monospace;
       white-space: pre; text-shadow: 0 2px 18px #060810a0; }
-    #cc-intro .cc-line { display: block; animation: cc-intro-line .4s ease both; }
-    #cc-intro .cc-line:nth-child(2) { animation-delay: .13s; }
-    #cc-intro .cc-line:nth-child(3) { animation-delay: .26s; }
-    #cc-intro .cc-line:nth-child(4) { animation-delay: .39s; }
+    #cc-intro .cc-line { display: block; animation: cc-intro-line .22s ease both; }
+    #cc-intro .cc-line:nth-child(2) { animation-delay: .06s; }
+    #cc-intro .cc-line:nth-child(3) { animation-delay: .12s; }
+    #cc-intro .cc-line:nth-child(4) { animation-delay: .18s; }
     #cc-intro .cc-blue { color: #87a4ff; }
     #cc-intro .cc-lime { color: #c6ff00; }
     #cc-intro .cc-comment { color: #c0cbe3; }
@@ -47,7 +41,7 @@
     #cc-intro .cc-skip { position: absolute; bottom: max(32px, env(safe-area-inset-bottom));
       right: 32px; padding: 12px 18px; min-height: 44px; border-radius: 8px;
       border: 1px solid #8092bd; background: #0d1222; color: #fff;
-      font: 500 14px system-ui, sans-serif; cursor: pointer; }
+      font: 500 14px system-ui, sans-serif; cursor: pointer; pointer-events: auto; }
     #cc-intro .cc-skip:focus-visible { outline: 3px solid #c6ff00; outline-offset: 4px; }
     @keyframes cc-intro-line { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes cc-intro-left { to { transform: translateX(-75vw); opacity: 0; } }
@@ -58,29 +52,25 @@
   const overlay = host.createElement('div');
   overlay.id = 'cc-intro';
   overlay.dataset.light = String(new URL(win.location.href).searchParams.get('theme') === 'light');
-  overlay.setAttribute('role', 'dialog');
-  overlay.setAttribute('aria-modal', 'true');
+  overlay.setAttribute('role', 'region');
   overlay.setAttribute('aria-label', 'Welcome to CaseCracker');
   const code = `<pre aria-hidden="true"><span class="cc-line cc-comment"># Every edge tells a story.</span><span class="cc-line"><span class="cc-blue">def</span> <span class="cc-lime">look_closer</span>(solution):</span><span class="cc-line">    <span class="cc-blue">return</span> a_new_perspective</span><span class="cc-line cc-comment"># CaseCracker</span></pre>`;
   overlay.innerHTML = `<div class="cc-code-stage" aria-hidden="true"><div class="cc-code-half">${code}</div><div class="cc-code-half">${code}</div></div><button class="cc-skip" type="button">Skip intro →</button>`;
   let timer;
-  const previousFocus = host.activeElement;
   const finish = () => {
     win.clearTimeout(timer);
     host.removeEventListener('keydown', onKey);
+    host.removeEventListener('pointerdown', finish, true);
+    host.removeEventListener('wheel', finish, true);
     overlay.remove(); style.remove();
-    if (previousFocus && previousFocus.isConnected) previousFocus.focus({preventScroll: true});
   };
-  const onKey = event => {
-    if (event.key === 'Escape') finish();
-    // Keep keyboard focus on the single intro control until dismissed.
-    if (event.key === 'Tab') { event.preventDefault(); overlay.querySelector('button').focus(); }
-  };
+  const onKey = () => finish();
   host.head.appendChild(style);
   host.body.appendChild(overlay);
   overlay.querySelector('button').addEventListener('click', finish);
   host.addEventListener('keydown', onKey);
-  overlay.querySelector('button').focus({preventScroll: true});
-  timer = win.setTimeout(finish, 2250);
+  host.addEventListener('pointerdown', finish, {capture: true, once: true});
+  host.addEventListener('wheel', finish, {capture: true, passive: true, once: true});
+  timer = win.setTimeout(finish, 1100);
 })();
 </script></body></html>

@@ -73,3 +73,40 @@ a { color: #9bb1ff; }
   .workspace-heading { flex-wrap: wrap; }
   .guide-grid article { padding: 1rem; }
 }
+
+/* Quiet, compact workspace styling. Motion responds to interaction only. */
+.block-container { max-width: 1280px; }
+.topbar { padding: .65rem 0 1.25rem; }
+.hero { padding: 3rem 0 2rem; max-width: 840px; }
+.hero h1 { font-size: clamp(2.5rem, 5vw, 4.5rem); font-weight: 650; letter-spacing: -.055em; line-height: 1.07; }
+.hero p { max-width: 630px; font-size: 1rem; }
+.hero-tags { margin-top: 1.3rem; }
+.workspace-link { display: inline-flex; gap: 2.5rem; align-items: center; margin-top: .4rem; padding: .85rem 1.1rem; border-radius: 8px; background: #2454ff; color: #fff !important; text-decoration: none !important; font-size: .85rem; font-weight: 600; }
+.workspace-link span { transition: transform 150ms ease; }
+.preview-banner { padding: .75rem 1rem; background: transparent; border-left-width: 2px; }
+.workspace-heading { margin-top: 2rem; }
+.guide-grid article { background: transparent; border-radius: 10px; }
+.empty-result { min-height: 360px; padding: 2rem 1rem; background: transparent; }
+.orbit { width: 72px; height: 72px; box-shadow: 0 0 0 10px #2454ff07; margin-bottom: 1.8rem; }
+.empty-result h3 { font-size: 1.5rem; }
+button, .workspace-link, .guide-grid article, .nav-links a, .brand-logo { transition: transform 140ms ease, background-color 140ms ease, border-color 140ms ease, box-shadow 140ms ease; }
+button, a, input, textarea { touch-action: manipulation; }
+button:not(:disabled):active, .workspace-link:active { transform: scale(.985); }
+button:disabled { cursor: not-allowed; }
+div[data-baseweb="textarea"]:focus-within { box-shadow: 0 0 0 2px #2454ff55; }
+@media (hover: hover) and (pointer: fine) {
+  button:not(:disabled):hover, .workspace-link:hover { transform: translateY(-1px); }
+  .workspace-link:hover span { transform: translate(2px, -2px); }
+  .guide-grid article:hover { transform: translateY(-3px); border-color: #5673c5; box-shadow: 0 8px 24px #0000000c; }
+  .brand:hover .brand-logo { transform: rotate(-5deg); }
+}
+@media (max-width: 900px) {
+  .hero { padding: 1.8rem 0; }
+  .hero h1 { font-size: clamp(2.4rem, 7vw, 3.6rem); }
+  .empty-result { min-height: 280px; }
+  .workspace-link { min-height: 44px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation: none !important; transition: none !important; }
+  button, .workspace-link, .guide-grid article, .brand-logo { transform: none !important; }
+}

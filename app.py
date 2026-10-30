@@ -23,9 +23,15 @@ def load_example():
 
 
 def clear_workspace():
-    st.session_state.update(problem="", code="", preview=False)
+    st.session_state.cleared_workspace = {key: st.session_state.get(key, "") for key in ("problem", "code", "custom_input", "custom_expected")}
+    st.session_state.update(problem="", code="", preview=False, custom_input="", custom_expected="")
     st.session_state.editor_revision = st.session_state.get("editor_revision", 0) + 1
     st.session_state.pop("result", None)
+
+
+def undo_clear():
+    st.session_state.update(st.session_state.pop("cleared_workspace", {}))
+    st.session_state.editor_revision = st.session_state.get("editor_revision", 0) + 1
 
 
 st.set_page_config(page_title="CaseCracker · Find your edge case", page_icon="🔎", layout="wide")
@@ -39,9 +45,9 @@ if "color_mode" not in st.session_state:
         "Light" if st.query_params.get("theme", "dark").lower() == "light" else "Dark"
     )
 st.radio("Appearance", ["Dark", "Light"], horizontal=True, key="color_mode", on_change=remember_appearance)
-st.markdown(f"<style>{(Path(__file__).parent / 'assets/style.css').read_text()}</style>", unsafe_allow_html=True)
+st.html(f"<style>{(Path(__file__).parent / 'assets/style.css').read_text()}</style>")
 if st.session_state.color_mode == "Light":
-    st.markdown(f"<style>{(Path(__file__).parent / 'assets/light.css').read_text()}</style>", unsafe_allow_html=True)
+    st.html(f"<style>{(Path(__file__).parent / 'assets/light.css').read_text()}</style>")
 
 logo_data = base64.b64encode((Path(__file__).parent / "assets/logo.svg").read_bytes()).decode("ascii")
 sandbox_active = is_sandbox_available()
@@ -58,12 +64,12 @@ st.markdown(f'''<nav class="topbar" aria-label="Main navigation">
 <a class="brand" href="#home"><img class="brand-logo" src="data:image/svg+xml;base64,{logo_data}" alt="" width="38" height="38"> CaseCracker<span class="beta">{"SANDBOX" if sandbox_active else "RUNNER"}</span></a>
 <div class="nav-links"><a href="#workspace">Workspace</a><a href="#guide">How it works ↗</a>
 <a href="https://github.com/devf8rge-project/CaseCracker" target="_blank" rel="noopener noreferrer">GitHub ↗</a></div></nav>
-<section class="hero" id="home"><div class="eyebrow"><span class="dot"></span> THE EDGE CASE WORKSPACE</div>
-<h1>Every solution has<br>a <span>breaking point.</span></h1>
-<p>A fresh perspective on your Python solution.<br>Bring the problem. Explore the boundaries. Find what you missed.</p>
-<div class="hero-tags"><span>01 / Describe</span><span>02 / Add code</span><span>03 / Inspect</span></div></section>
+<section class="hero" id="home"><div class="eyebrow"><span class="dot"></span> A WORKSPACE FOR THE WHAT-IFS</div>
+<h1>Find the case<br>you <span>didn’t consider.</span></h1>
+<p>One problem. One solution. A closer look at the boundaries.<br>Put your Python code to the test.</p>
+<a class="workspace-link" href="#workspace">Open workspace <span>↗</span></a><div class="hero-tags"><span>01 / Describe</span><span>02 / Add code</span><span>03 / Inspect</span></div></section>
 {runner_badge}
-<div id="workspace" class="workspace-heading"><div><span class="eyebrow">THE WORKBENCH</span><h2>Challenge your assumptions.</h2></div><span class="language-tag">Python 3</span></div>''', unsafe_allow_html=True)
+<div id="workspace" class="workspace-heading"><div><span class="eyebrow">THE WORKBENCH</span><h2>Your next test starts here.</h2></div><span class="language-tag">Python 3</span></div>''', unsafe_allow_html=True)
 
 expanded = st.toggle("Expand workspace", key="expanded_workspace", help="Use the full page width and a taller editor. Results move below the workspace.")
 if expanded:
@@ -79,6 +85,8 @@ with workspace:
         st.button("Load example", on_click=load_example, use_container_width=True)
     with clear_action:
         st.button("Clear", on_click=clear_workspace, use_container_width=True, help="Clears the current problem, code, and results.")
+    if st.session_state.get("cleared_workspace"):
+        st.button("Undo clear", on_click=undo_clear, help="Restore the problem and code you just cleared.")
     with st.container(border=True):
         st.text_area("Problem statement", key="problem", height=190, placeholder="What should the program do? Include input/output format, constraints, and examples.", help="Include boundary values and the expected behavior for unusual inputs.")
         render_editor()
@@ -101,7 +109,7 @@ with workspace:
 
         st.checkbox("Show temporary sample results (illustration only)", key="preview", help="Displays fixed demo data, not a test of your code.")
         submitted = st.button("Find failing test →", type="primary", use_container_width=True)
-        st.caption("Secure sandbox execution: Network blocked, isolated filesystem, 2.0s timeout.")
+        st.caption("Sample mode shows illustrative data." if st.session_state.get("preview") else ("Network and filesystem isolation enabled on this host." if sandbox_active else "Process limits enabled. Network and filesystem sandboxing unavailable on this host."))
 
     if submitted:
         st.session_state.pop("result", None)
@@ -126,7 +134,8 @@ with workspace:
                 )
             else:
                 suggestion = suggest_test(problem_val, code_val)
-            st.session_state.result = find_failing_test(problem_val, code_val, suggestion)
+            with st.spinner("Checking your test…"):
+                st.session_state.result = find_failing_test(problem_val, code_val, suggestion)
 
 with results:
     st.markdown('<div class="panel-label results-label">02 &nbsp; / &nbsp; TEST INSIGHTS</div>', unsafe_allow_html=True)
@@ -137,11 +146,11 @@ with results:
         st.caption("Good edge cases start at the boundaries of the problem’s valid inputs.")
         st.markdown('<div class="edge-tags"><span>Minimum size</span><span>Repeated values</span><span>Zero & negatives</span><span>Upper limits</span></div>', unsafe_allow_html=True)
 
-st.markdown(f'''<section id="guide" class="guide"><div class="eyebrow">A LITTLE METHOD. A LOT OF CLARITY.</div><h2>From problem to perspective.</h2><div class="guide-grid">
+st.markdown(f'''<section id="guide" class="guide"><div class="eyebrow">KEEP IT SIMPLE</div><h2>Three steps. Nothing extra.</h2><div class="guide-grid">
 <article><span>01</span><h3>Set the scene</h3><p>Describe the goal, constraints, and exactly what a correct answer looks like.</p></article>
 <article><span>02</span><h3>Bring your logic</h3><p>Paste a complete Python script. Load the example to explore the interface.</p></article>
-<article><span>03</span><h3>Read the evidence</h3><p>Inspect verified results from the sandboxed runner or explore sample edge cases.</p></article>
-</div></section><footer><div class="brand"><img class="brand-logo" src="data:image/svg+xml;base64,{logo_data}" alt="" width="32" height="32"> CaseCracker</div><span>Stay curious. Check the boundaries.</span><span>Secure sandboxed execution active</span></footer>''', unsafe_allow_html=True)
+<article><span>03</span><h3>Read the evidence</h3><p>Compare the reported output with your expected answer. Sample results are always labeled.</p></article>
+</div></section><footer><div class="brand"><img class="brand-logo" src="data:image/svg+xml;base64,{logo_data}" alt="" width="32" height="32"> CaseCracker</div><span>Stay curious. Check the boundaries.</span><span>Python workspace · CaseCracker</span></footer>''', unsafe_allow_html=True)
 
 # Mount after the page so the real workspace is visible behind the blur.
 render_intro()
