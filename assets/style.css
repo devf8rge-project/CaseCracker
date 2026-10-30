@@ -1,17 +1,18 @@
+:root { --midnight: #060810; --cobalt: #2454ff; --acid-lime: #c6ff00; }
 .block-container { max-width: 1440px; padding-top: 2.5rem; padding-bottom: 2rem; }
 .brand { font-size: 1.15rem; font-weight: 750; letter-spacing: -.04em; }
-.brand span { color: #b8f27b; }
-.eyebrow { color: #b8f27b; font-size: .74rem; letter-spacing: .16em; font-weight: 700; margin-top: 2.6rem; }
+.brand span { color: #c6ff00; }
+.eyebrow { color: #c6ff00; font-size: .74rem; letter-spacing: .16em; font-weight: 700; margin-top: 2.6rem; }
 .hero-title { font-size: clamp(2.5rem, 5vw, 4.2rem); line-height: 1.08; font-weight: 750; letter-spacing: -.055em; margin: .8rem 0 1rem; }
-.hero-title span { color: #b8f27b; }
-.hero-description { color: #aab8ae; max-width: 650px; font-size: 1.05rem; line-height: 1.7; margin-bottom: 2rem; }
-.section-note { color: #aab8ae; font-size: .9rem; margin-bottom: 1.25rem; }
-.empty-result { text-align: center; padding: 3rem 1rem; border: 1px dashed #3a483e; border-radius: 14px; margin: 1rem 0; }
-.empty-result .symbol { font-size: 2rem; color: #b8f27b; margin-bottom: 1rem; }
+.hero-title span { color: #c6ff00; }
+.hero-description { color: #a8aec3; max-width: 650px; font-size: 1.05rem; line-height: 1.7; margin-bottom: 2rem; }
+.section-note { color: #a8aec3; font-size: .9rem; margin-bottom: 1.25rem; }
+.empty-result { text-align: center; padding: 3rem 1rem; border: 1px dashed #334477; border-radius: 14px; margin: 1rem 0; }
+.empty-result .symbol { font-size: 2rem; color: #c6ff00; margin-bottom: 1rem; }
 .empty-result h3 { font-size: 1.15rem; letter-spacing: -.025em; }
-.empty-result p { color: #aab8ae; font-size: .9rem; line-height: 1.7; }
-.footer { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #2c372f; color: #aab8ae; font-size: .8rem; }
-div[data-testid="stForm"] { border-color: #334036; border-radius: 16px; padding: 1.5rem; }
+.empty-result p { color: #a8aec3; font-size: .9rem; line-height: 1.7; }
+.footer { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #222b48; color: #a8aec3; font-size: .8rem; }
+div[data-testid="stForm"] { border-color: #28345a; border-radius: 16px; padding: 1.5rem; }
 div[data-testid="stTextArea"] textarea { line-height: 1.6; border-radius: 10px; }
 div[data-testid="stTextArea"]:nth-of-type(2) textarea { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; }
 button[kind="primaryFormSubmit"] { min-height: 3rem; font-weight: 700; }
@@ -20,3 +21,16 @@ button[kind="primaryFormSubmit"] { min-height: 3rem; font-weight: 700; }
   .eyebrow { margin-top: 1.8rem; }
   div[data-testid="stForm"] { padding: 1rem; }
 }
+
+.stApp { background: radial-gradient(ellipse at 95% 0%, rgba(36, 84, 255, .14), transparent 45%), var(--midnight); color: #f2f4ff; }
+.hero-title span { color: var(--acid-lime); }
+.brand span { color: #6c8cff; }
+.eyebrow { color: #8ba4ff; }
+div[data-testid="stForm"] { background: #0d1222; box-shadow: 0 12px 48px rgba(0, 0, 0, .2); }
+.empty-result { background: linear-gradient(145deg, rgba(36, 84, 255, .10), rgba(13, 18, 34, .5)); }
+div[data-testid="stTextArea"] textarea { background-color: #080c18; color: #f2f4ff; caret-color: var(--acid-lime); }
+button[kind="primaryFormSubmit"] { background: var(--cobalt); border: 1px solid var(--cobalt); color: #ffffff; box-shadow: 0 4px 20px rgba(36, 84, 255, .22); }
+button[kind="primaryFormSubmit"]:hover { background: #1944df; border-color: #8ba4ff; color: #ffffff; }
+button[kind="primaryFormSubmit"]:focus-visible { outline: 3px solid var(--acid-lime); outline-offset: 3px; }
+a { color: #8ba4ff; }
+::selection { background: var(--acid-lime); color: var(--midnight); }
