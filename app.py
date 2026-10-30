@@ -5,7 +5,7 @@ import streamlit as st
 
 from casecracker.ai import suggest_test
 from casecracker.editor import render_editor
-from casecracker.examples import EXAMPLES
+from casecracker.examples import DEMO_EXAMPLE
 from casecracker.execution import find_failing_test
 from casecracker.samples import sample_result
 from casecracker.ui import render_results
@@ -13,7 +13,7 @@ from casecracker.ui import render_results
 
 
 def load_example():
-    problem, code = EXAMPLES[st.session_state.get("example_choice", next(iter(EXAMPLES)))]
+    problem, code = DEMO_EXAMPLE
     st.session_state.update(problem=problem, code=code, preview=True)
     st.session_state.editor_revision = st.session_state.get("editor_revision", 0) + 1
     st.session_state.pop("result", None)
@@ -40,7 +40,6 @@ st.markdown('''<nav class="topbar" aria-label="Main navigation">
 
 workspace, results = st.columns([1.2, 1], gap="large")
 with workspace:
-    st.selectbox("Example library", list(EXAMPLES), key="example_choice", help="Choose a practice prompt, then click Load example. Loading replaces your current problem and code.")
     toolbar_label, example_action, clear_action = st.columns([2, 1.3, 1])
     with toolbar_label:
         st.markdown('<div class="panel-label">01 &nbsp; / &nbsp; YOUR SOLUTION</div>', unsafe_allow_html=True)
