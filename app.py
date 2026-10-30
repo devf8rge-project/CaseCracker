@@ -29,7 +29,15 @@ def clear_workspace():
 
 st.set_page_config(page_title="CaseCracker · Find your edge case", page_icon="🔎", layout="wide")
 
-st.radio("Appearance", ["Dark", "Light"], horizontal=True, key="color_mode")
+def remember_appearance():
+    st.query_params["theme"] = st.session_state.color_mode.lower()
+
+
+if "color_mode" not in st.session_state:
+    st.session_state.color_mode = (
+        "Light" if st.query_params.get("theme", "dark").lower() == "light" else "Dark"
+    )
+st.radio("Appearance", ["Dark", "Light"], horizontal=True, key="color_mode", on_change=remember_appearance)
 st.markdown(f"<style>{(Path(__file__).parent / 'assets/style.css').read_text()}</style>", unsafe_allow_html=True)
 if st.session_state.color_mode == "Light":
     st.markdown(f"<style>{(Path(__file__).parent / 'assets/light.css').read_text()}</style>", unsafe_allow_html=True)

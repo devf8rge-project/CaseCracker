@@ -24,7 +24,8 @@ of the problem or solution entered; they are not generated test results.
 Additional workspace tools:
 
 - Appearance switches between dark and light palettes, including the Python
-  editor. The choice lasts for the current Streamlit session.
+  editor. The choice is stored in the URL's `theme` parameter so refreshing the
+  same page preserves it. A fresh URL without a theme defaults to dark.
 - Upload UTF-8 `.py` files up to 200 KB to replace the editor contents.
 - Expand workspace uses the full page width and a taller editor; it is not a
   browser fullscreen mode.
