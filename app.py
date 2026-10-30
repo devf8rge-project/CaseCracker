@@ -38,7 +38,11 @@ st.markdown('''<nav class="topbar" aria-label="Main navigation">
 <div class="preview-banner"><strong>INTERFACE PREVIEW</strong><span>AI and runner are not connected. Your code will not be executed.</span></div>
 <div id="workspace" class="workspace-heading"><div><span class="eyebrow">THE WORKBENCH</span><h2>Challenge your assumptions.</h2></div><span class="language-tag">Python 3</span></div>''', unsafe_allow_html=True)
 
-workspace, results = st.columns([1.2, 1], gap="large")
+expanded = st.toggle("Expand workspace", key="expanded_workspace", help="Use the full page width and a taller editor. Results move below the workspace.")
+if expanded:
+    workspace, results = st.container(), st.container()
+else:
+    workspace, results = st.columns([1.2, 1], gap="large")
 with workspace:
     toolbar_label, example_action, clear_action = st.columns([2, 1.3, 1])
     with toolbar_label:

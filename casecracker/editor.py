@@ -35,11 +35,12 @@ def render_editor() -> None:
         wrap = st.checkbox("Wrap long lines", value=True)
         show_gutter = st.checkbox("Show line numbers", value=True)
     plain = st.checkbox("Use basic text editor", key="basic_editor", on_change=reset_editor_instance, help="A standard text box for screen readers or devices where the code editor is inconvenient.")
+    height = 620 if st.session_state.get("expanded_workspace") else 340
     revision = st.session_state.get("editor_revision", 0)
     if plain:
-        value = st.text_area("Python code", value=st.session_state.get("code", ""), height=340, key=f"plain_code_{revision}", label_visibility="collapsed", placeholder="# Paste your complete Python solution here…")
+        value = st.text_area("Python code", value=st.session_state.get("code", ""), height=height, key=f"plain_code_{revision}", label_visibility="collapsed", placeholder="# Paste your complete Python solution here…")
     else:
-        value = st_ace(value=st.session_state.get("code", ""), language="python", theme="tomorrow_night", key=f"python_editor_{revision}", font_size=font_size, tab_size=4, show_gutter=show_gutter, show_print_margin=False, wrap=wrap, auto_update=True, min_lines=16, height=340)
+        value = st_ace(value=st.session_state.get("code", ""), language="python", theme="tomorrow_night", key=f"python_editor_{revision}", font_size=font_size, tab_size=4, show_gutter=show_gutter, show_print_margin=False, wrap=wrap, auto_update=True, min_lines=16, height=height)
     if value is not None:
         st.session_state.code = value
     code = st.session_state.get("code", "")
