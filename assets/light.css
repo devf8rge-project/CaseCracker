@@ -37,3 +37,20 @@ div[data-testid="stAlert"] p { color: #162039; }
 header[data-testid="stHeader"] { background: #ffffff; }
 header[data-testid="stHeader"] button { color: #162039; }
 ::selection { background: #d3ed84; color: #162039; }
+
+/* Light mode uses white across the entire workspace, not only the page. */
+.stApp, div[data-testid="stAppViewContainer"], section[data-testid="stMain"],
+header[data-testid="stHeader"], div[data-testid="stMainBlockContainer"],
+div[data-testid="stVerticalBlockBorderWrapper"] > div,
+div[data-testid="stExpander"] details, div[data-testid="stExpander"] summary,
+div[data-testid="stFileUploaderDropzone"], div[data-testid="stFileUploaderDropzoneInstructions"],
+div[data-baseweb="textarea"], div[data-baseweb="input"],
+div[data-testid="stTextArea"] textarea,
+.preview-banner, .empty-result, .guide-grid article, .edge-tags span {
+  background: #ffffff !important;
+  background-image: none !important;
+}
+div[data-testid="stCode"], div[data-testid="stCode"] pre,
+div[data-testid="stCode"] code, div[data-testid="stAlert"] {
+  background: #ffffff !important;
+}
