@@ -23,6 +23,8 @@ of the problem or solution entered; they are not generated test results.
 
 Additional workspace tools:
 
+- Appearance switches between dark and light palettes, including the Python
+  editor. The choice lasts for the current Streamlit session.
 - Upload UTF-8 `.py` files up to 200 KB to replace the editor contents.
 - Expand workspace uses the full page width and a taller editor; it is not a
   browser fullscreen mode.

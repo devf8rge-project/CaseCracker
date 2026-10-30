@@ -1,0 +1,39 @@
+:root, .stApp {
+  --midnight: #f6f8ff; --surface: #ffffff; --muted: #4c5870; --border: #ccd4e6;
+  --text-color: #162039; --background-color: #f6f8ff;
+  --secondary-background-color: #eaf0fb; --primary-color: #2454ff;
+  color-scheme: light;
+}
+.stApp { background: radial-gradient(ellipse at 80% 8%, #2454ff0b, transparent 36%), #f6f8ff; color: #162039; }
+.brand { color: #162039 !important; }
+.hero h1, .hero h1 span, .workspace-heading h2, .guide h2, .guide-grid h3, .empty-result h3 { color: #162039; }
+.eyebrow { color: #2548b8; }
+.beta, .language-tag { color: #3a4b70; border-color: #bac7e2; }
+.hero-tags, .panel-label, footer, .empty-status { color: #4c5870; }
+.dot { background: #527000; }
+.preview-banner { color: #344877; background: #e9eeff; border-color: #b1c2f7; border-left-color: #2454ff; }
+.preview-banner strong { color: #2548b8; }
+.guide-grid article, div[data-testid="stForm"] { background: #ffffff; border-color: #ccd4e6; }
+.guide-grid article > span, .orbit span { color: #526e00; }
+.orbit { border-color: #9eb0e2; }
+.edge-tags span { color: #3a4b70; border-color: #c1cce1; background: #edf2fc; }
+.nav-links a, a { color: #2448b5; }
+.nav-links a:hover { color: #132f83; }
+div[data-testid="stTextArea"] textarea { background: #ffffff; color: #162039; caret-color: #2454ff; }
+div[data-testid="stTextArea"] textarea::placeholder { color: #64718a; }
+div[data-baseweb="textarea"], div[data-baseweb="input"] { background: #ffffff; border-color: #bac7df; }
+div[data-testid="stMarkdownContainer"], div[data-testid="stWidgetLabel"], div[data-testid="stCaptionContainer"], label, h1, h2, h3 { color: #162039; }
+div[data-testid="stCaptionContainer"] { color: #4c5870; }
+button[kind="secondary"], button[kind="tertiary"], div[data-testid="stDownloadButton"] button { background: #ffffff; color: #20365e; border-color: #bac7df; }
+button[kind="secondary"]:hover, div[data-testid="stDownloadButton"] button:hover { background: #e9eeff; border-color: #2454ff; color: #193cb3; }
+div[data-testid="stExpander"] details { background: #ffffff; border-color: #ccd4e6; color: #162039; }
+div[data-testid="stFileUploaderDropzone"] { background: #eaf0fb; color: #162039; }
+div[data-testid="stFileUploaderDropzone"] small { color: #4c5870; }
+div[data-testid="stCode"], div[data-testid="stCode"] pre, div[data-testid="stCode"] code { background: #edf1fa !important; color: #162039 !important; }
+div[data-testid="stTabs"] button { color: #344877; }
+div[data-testid="stTabs"] button[aria-selected="true"] { color: #2448b5; }
+div[data-testid="stAlert"] { color: #162039; background: #e9eeff; }
+div[data-testid="stAlert"] p { color: #162039; }
+header[data-testid="stHeader"] { background: #f6f8fff2; }
+header[data-testid="stHeader"] button { color: #162039; }
+::selection { background: #d3ed84; color: #162039; }

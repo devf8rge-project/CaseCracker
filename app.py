@@ -27,7 +27,10 @@ def clear_workspace():
 
 
 st.set_page_config(page_title="CaseCracker · Find your edge case", page_icon="🔎", layout="wide")
+st.radio("Appearance", ["Dark", "Light"], horizontal=True, key="color_mode")
 st.markdown(f"<style>{(Path(__file__).parent / 'assets/style.css').read_text()}</style>", unsafe_allow_html=True)
+if st.session_state.color_mode == "Light":
+    st.markdown(f"<style>{(Path(__file__).parent / 'assets/light.css').read_text()}</style>", unsafe_allow_html=True)
 logo_data = base64.b64encode((Path(__file__).parent / "assets/logo.svg").read_bytes()).decode("ascii")
 st.markdown(f'''<nav class="topbar" aria-label="Main navigation">
 <a class="brand" href="#home"><img class="brand-logo" src="data:image/svg+xml;base64,{logo_data}" alt="" width="38" height="38"> CaseCracker<span class="beta">PREVIEW</span></a>
