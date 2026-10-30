@@ -3,6 +3,8 @@
 A simple Streamlit interface for entering a problem and Python solution, with a
 results panel and an optional, clearly labeled temporary sample preview.
 
+**[Open CaseCracker](https://casecracker-itcq4tjahosrmwkimbbxjd.streamlit.app/)**
+
 ## Run locally
 
 Requires Python 3.10 or newer.
@@ -14,8 +16,8 @@ python -m streamlit run app.py
 
 ## Deployment
 
-The app is hosted on Streamlit Community Cloud (deployment reported by the
-project owner). The public app URL has not yet been added to this README.
+The app is hosted on Streamlit Community Cloud:
+[casecracker-itcq4tjahosrmwkimbbxjd.streamlit.app](https://casecracker-itcq4tjahosrmwkimbbxjd.streamlit.app/).
 
 Deployment configuration:
 
