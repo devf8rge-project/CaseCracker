@@ -13,7 +13,7 @@ html { scroll-behavior: smooth; scroll-padding-top: 5rem; }
 .eyebrow { color: #98acff; font-size: .68rem; letter-spacing: .15em; font-weight: 700; }
 .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--lime); margin: 0 .5rem .1rem 0; }
 .hero h1 { font-size: clamp(2.8rem, 6vw, 5.5rem); line-height: 1.03; font-weight: 750; letter-spacing: -.065em; margin: 1.3rem 0; padding: 0; }
-.hero h1 span { color: var(--lime); }
+.hero h1 span { color: #f2f4ff; }
 .hero p { color: var(--muted); font-size: 1.05rem; line-height: 1.8; }
 .hero-tags { display: flex; gap: 1.5rem; color: #8794b5; font-size: .7rem; font-family: ui-monospace, monospace; margin-top: 1.8rem; }
 .preview-banner { display: flex; align-items: center; flex-wrap: wrap; gap: .8rem 1.3rem; background: #10204c; border: 1px solid #2b4385; border-left: 3px solid var(--cobalt); border-radius: 8px; padding: 1rem 1.2rem; font-size: .83rem; color: #c1cbed; }
