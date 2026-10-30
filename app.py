@@ -8,6 +8,7 @@ from casecracker.ai import suggest_test
 from casecracker.editor import render_editor
 from casecracker.examples import DEMO_EXAMPLE
 from casecracker.execution import find_failing_test
+from casecracker.intro import render_intro
 from casecracker.models import TestSuggestion
 from casecracker.runner import is_sandbox_available
 from casecracker.samples import sample_result
@@ -141,3 +142,6 @@ st.markdown(f'''<section id="guide" class="guide"><div class="eyebrow">A LITTLE 
 <article><span>02</span><h3>Bring your logic</h3><p>Paste a complete Python script. Load the example to explore the interface.</p></article>
 <article><span>03</span><h3>Read the evidence</h3><p>Inspect verified results from the sandboxed runner or explore sample edge cases.</p></article>
 </div></section><footer><div class="brand"><img class="brand-logo" src="data:image/svg+xml;base64,{logo_data}" alt="" width="32" height="32"> CaseCracker</div><span>Stay curious. Check the boundaries.</span><span>Secure sandboxed execution active</span></footer>''', unsafe_allow_html=True)
+
+# Mount after the page so the real workspace is visible behind the blur.
+render_intro()
