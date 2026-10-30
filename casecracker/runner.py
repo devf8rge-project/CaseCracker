@@ -1,13 +1,15 @@
-"""Secure Python execution runner with macOS Seatbelt sandbox and resource isolation."""
+"""Secure Python execution runner with macOS Seatbelt sandbox, resource isolation, and dual execution modes."""
 
 from __future__ import annotations
 
 import ast
 from dataclasses import dataclass
+import inspect
 import math
 import os
 from pathlib import Path
 import platform
+import re
 import resource
 import shutil
 import subprocess
@@ -32,12 +34,144 @@ class ExecutionResult:
     exit_code: int | None
     execution_time_ms: float
     error_message: str | None = None
+    error_line: int | None = None
+    error_traceback: str | None = None
     sandboxed: bool = False
+    mode_used: str = "stdin_stdout"  # "solve_function" or "stdin_stdout"
 
 
 def is_sandbox_available() -> bool:
     """Check if macOS native sandbox-exec is available on this system."""
-    return platform.system() == "Darwin" and os.path.isfile("/usr/bin/sandbox-exec") and os.access("/usr/bin/sandbox-exec", os.X_OK)
+    return (
+        platform.system() == "Darwin"
+        and os.path.isfile("/usr/bin/sandbox-exec")
+        and os.access("/usr/bin/sandbox-exec", os.X_OK)
+    )
+
+
+def check_syntax(code: str) -> tuple[bool, str | None, int | None]:
+    """Validate Python syntax without executing.
+
+    Returns:
+        (is_valid, error_message, line_number)
+    """
+    try:
+        ast.parse(code)
+        return True, None, None
+    except SyntaxError as exc:
+        msg = f"SyntaxError on line {exc.lineno}: {exc.msg}"
+        return False, msg, exc.lineno
+
+
+def has_solve_function(code: str) -> bool:
+    """Check if user code defines a top-level solve(...) function."""
+    try:
+        tree = ast.parse(code)
+        for node in tree.body:
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == "solve":
+                return True
+    except SyntaxError:
+        pass
+    return False
+
+
+def _parse_traceback(tb_str: str) -> tuple[int | None, str, str]:
+    """Parse stderr traceback to extract the offending user line number, summary, and clean trace."""
+    line_match = re.search(r"File \".*solution\.py\", line (\d+)", tb_str)
+    line_no = int(line_match.group(1)) if line_match else None
+
+    # Replace temp directory paths with simple filename for clean presentation
+    cleaned_tb = re.sub(r"File \".*solution\.py\"", 'File "solution.py"', tb_str.strip())
+    # Remove internal harness frames if present
+    cleaned_tb = re.sub(r'  File ".*harness\.py", line \d+, in .*\n(    .*\n)*', "", cleaned_tb)
+
+    lines = [l for l in tb_str.strip().splitlines() if l.strip()]
+    exc_summary = lines[-1] if lines else "Runtime error"
+
+    return line_no, exc_summary, cleaned_tb
+
+
+_HARNESS_CODE = """
+import sys
+import os
+import json
+import ast
+import inspect
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+try:
+    import solution
+except Exception:
+    import traceback
+    traceback.print_exc()
+    sys.exit(1)
+
+if hasattr(solution, "solve") and callable(getattr(solution, "solve")):
+    fn = getattr(solution, "solve")
+    raw_input = sys.stdin.read()
+    cleaned = raw_input.strip()
+
+    parsed_input = None
+    if cleaned:
+        for parser in (json.loads, ast.literal_eval):
+            try:
+                parsed_input = parser(cleaned)
+                break
+            except Exception:
+                pass
+
+    try:
+        sig = inspect.signature(fn)
+        param_count = len(sig.parameters)
+    except Exception:
+        param_count = 1
+
+    try:
+        result = None
+        called = False
+
+        # If function expects multiple parameters and parsed_input is a list/tuple of matching length
+        if (
+            parsed_input is not None
+            and isinstance(parsed_input, (list, tuple))
+            and param_count == len(parsed_input)
+            and param_count > 1
+        ):
+            try:
+                result = fn(*parsed_input)
+                called = True
+            except TypeError:
+                pass
+
+        if not called and parsed_input is not None and param_count == 1:
+            try:
+                result = fn(parsed_input)
+                called = True
+            except TypeError:
+                pass
+
+        if not called:
+            # Fallback to passing raw input string (preserving internal newlines)
+            arg = raw_input.rstrip("\\r\\n")
+            result = fn(arg)
+
+        if result is not None:
+            if isinstance(result, (dict, list)):
+                print(json.dumps(result))
+            elif isinstance(result, bool):
+                print(str(result))
+            else:
+                print(result)
+    except Exception:
+        import traceback
+        traceback.print_exc()
+        sys.exit(1)
+else:
+    # If solve wasn't callable, exit with notice
+    sys.stderr.write("AttributeError: solve function not found or not callable.\\n")
+    sys.exit(1)
+"""
 
 
 def execute_code(
@@ -47,31 +181,36 @@ def execute_code(
 ) -> ExecutionResult:
     """Execute arbitrary Python code inside an isolated, sandboxed subprocess.
 
-    Security guarantees:
-    1. Pre-execution static AST validation (detects syntax errors before spawn).
+    Security & Reliability Guarantees:
+    1. Pre-execution static AST validation (catches syntax errors before spawning).
     2. macOS Seatbelt sandbox:
-       - Network access blocked completely (deny network*).
-       - Filesystem write blocked everywhere except an ephemeral scratch directory.
-    3. POSIX resource limits (CPU limit, max file size limit).
-    4. Subprocess wall-clock timeout watchdog.
-    5. Isolated Python execution (`python -I -B -u` with sanitized environment).
-    6. Truncated output to prevent memory exhaustion bombs.
+       - Network access completely denied (deny network*).
+       - Filesystem writes blocked everywhere except an ephemeral scratch directory.
+    3. POSIX resource limits (CPU time limit, file creation size limit).
+    4. Subprocess wall-clock timeout watchdog (kills infinite loops).
+    5. Isolated Python execution (`python -I -B -u` with sanitized minimal environment).
+    6. Truncated output to prevent memory exhaustion.
+    7. Supports both standard `stdin/stdout` scripts and `solve(input_data)` functions.
     """
     # 1. Pre-execution static syntax validation
-    try:
-        ast.parse(code)
-    except SyntaxError as e:
-        line_info = f" (line {e.lineno})" if e.lineno else ""
+    valid_syntax, syn_err, syn_line = check_syntax(code)
+    if not valid_syntax:
         return ExecutionResult(
             success=False,
             stdout="",
-            stderr=f"SyntaxError{line_info}: {e.msg}",
+            stderr=syn_err or "SyntaxError",
             timed_out=False,
             exit_code=1,
             execution_time_ms=0.0,
-            error_message=f"Syntax error{line_info}: {e.msg}",
+            error_message=syn_err,
+            error_line=syn_line,
+            error_traceback=syn_err,
             sandboxed=False,
         )
+
+    # Detect execution mode (solve() vs stdin/stdout)
+    uses_solve = has_solve_function(code)
+    mode_used = "solve_function" if uses_solve else "stdin_stdout"
 
     # 2. Ephemeral isolated working directory
     with tempfile.TemporaryDirectory(prefix="casecracker_runner_") as scratch_dir:
@@ -80,10 +219,18 @@ def execute_code(
         with open(script_file, "w", encoding="utf-8") as f:
             f.write(code)
 
+        if uses_solve:
+            harness_file = os.path.join(scratch_dir, "harness.py")
+            with open(harness_file, "w", encoding="utf-8") as f:
+                f.write(_HARNESS_CODE)
+            target_script = "harness.py"
+        else:
+            target_script = "solution.py"
+
         sandbox_enabled = is_sandbox_available()
 
         if sandbox_enabled:
-            # Seatbelt profile: allow reading libraries/exec, block network, write only in scratch
+            # Seatbelt profile: allow reading standard libraries/exec, block network, write only in scratch
             profile = (
                 "(version 1)"
                 "(allow default)"
@@ -100,7 +247,7 @@ def execute_code(
                 "-I",
                 "-B",
                 "-u",
-                "solution.py",
+                target_script,
             ]
         else:
             cmd = [
@@ -108,7 +255,7 @@ def execute_code(
                 "-I",
                 "-B",
                 "-u",
-                "solution.py",
+                target_script,
             ]
 
         def configure_limits():
@@ -162,13 +309,19 @@ def execute_code(
 
             success = proc.returncode == 0
             error_message = None
+            error_line = None
+            error_traceback = None
+
             if not success:
                 if "PermissionError" in stderr:
                     error_message = "Security restriction: attempted unauthorized filesystem modification."
                 elif "URLError" in stderr or "socket" in stderr.lower():
                     error_message = "Security restriction: network communication is blocked."
                 else:
-                    error_message = f"Runtime error (exit code {proc.returncode})"
+                    line_no, exc_summary, cleaned_tb = _parse_traceback(stderr)
+                    error_message = exc_summary
+                    error_line = line_no
+                    error_traceback = cleaned_tb
 
             return ExecutionResult(
                 success=success,
@@ -178,7 +331,10 @@ def execute_code(
                 exit_code=proc.returncode,
                 execution_time_ms=duration_ms,
                 error_message=error_message,
+                error_line=error_line,
+                error_traceback=error_traceback or (stderr if not success else None),
                 sandboxed=sandbox_enabled,
+                mode_used=mode_used,
             )
 
         except subprocess.TimeoutExpired:
@@ -191,17 +347,23 @@ def execute_code(
                 exit_code=None,
                 execution_time_ms=duration_ms,
                 error_message=f"Time Limit Exceeded (> {limits.timeout_seconds:.1f}s)",
+                error_line=None,
+                error_traceback="Process was terminated because it exceeded the per-test execution timeout.",
                 sandboxed=sandbox_enabled,
+                mode_used=mode_used,
             )
         except Exception as exc:
             duration_ms = (time.perf_counter() - start_time) * 1000.0
             return ExecutionResult(
                 success=False,
                 stdout="",
-                stderr=f"Execution failed: {exc}",
+                stderr=f"Execution error: {exc}",
                 timed_out=False,
                 exit_code=1,
                 execution_time_ms=duration_ms,
                 error_message=f"Execution error: {exc}",
+                error_line=None,
+                error_traceback=str(exc),
                 sandboxed=sandbox_enabled,
+                mode_used=mode_used,
             )

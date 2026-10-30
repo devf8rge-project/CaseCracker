@@ -1,53 +1,118 @@
 # CaseCracker
 
-A simple Streamlit interface for entering a problem and Python solution, with a
-results panel and an optional, clearly labeled temporary sample preview.
+A powerful, secure Streamlit testing environment for exploring Python solutions, discovering edge cases, and running test suites with OS-level sandboxing.
 
 **[Open CaseCracker](https://casecracker-itcq4tjahosrmwkimbbxjd.streamlit.app/)**
 
-## Frontend
+---
 
-Midnight black, electric cobalt blue, and acid lime styling with a responsive
-workspace, section navigation, and an input guide. Load example fills an
-illustrative problem and buggy solution and enables sample mode; Clear resets
-the workspace. The Python editor provides syntax highlighting, line numbers,
-four-space indentation, and automatic edit syncing. A basic text editor is
-available as an alternative. The editor only edits text and does not run code.
-Results include test details, an explanation tab, and a JSON download that
-preserves the sample and execution status flags.
+## Testing Engine & Execution Contracts
 
-Editor settings control font size, line numbers, and line wrapping; code can be saved
-as `solution.py`. The Compare output tab highlights textual differences between
-the displayed outputs. Sample results stay fixed and illustrative, regardless
-of the problem or solution entered; they are not generated test results.
+CaseCracker supports normal Python solutions and runs each test case independently in an isolated, sandboxed subprocess.
 
-Additional workspace tools:
+### 1. Supported Solution Formats
+You can write Python solutions in either of two standard styles:
 
-- Editor updates run independently of the surrounding page to avoid full-page
-  reruns while typing. Buttons have short hover/press feedback, and Clear offers
-  an Undo action. Server actions still depend on network and execution time.
-- A brief opening animation shows decorative code over the blurred website,
-  then splits outward to reveal the page in about one second. It replays on
-  page refresh, but not on ordinary widget updates. Clicking, scrolling, typing,
-  or choosing Skip dismisses it immediately; reduced-motion preferences bypass
-  it entirely. The overlay does not block interaction with the page.
-- Appearance switches between dark and light palettes, including the Python
-  editor. The choice is stored in the URL's `theme` parameter so refreshing the
-  same page preserves it. A fresh URL without a theme defaults to dark.
-- Upload UTF-8 `.py` files up to 200 KB to replace the editor contents.
-- Expand workspace uses the full page width and a taller editor; it is not a
-  browser fullscreen mode.
-- A custom SVG logo and mobile layouts provide larger touch controls and
-  stacked panels on narrow screens.
+1. **Standard I/O Mode (`stdin/stdout`)**:
+   Read from standard input using `input()` or `sys.stdin.read()` and output answers using `print()`.
+   ```python
+   n = int(input())
+   values = list(map(int, input().split()))
+   print(sum(values))
+   ```
 
-## Run locally
+2. **Function Mode (`def solve`)**:
+   Define a top-level `solve(input_data)` function returning the answer. The runner invokes `solve()` with the test case input (or parsed JSON/structure) and captures the return value:
+   ```python
+   def solve(data):
+       values = list(map(int, data.split()))
+       return sum(values)
+   ```
+
+### 2. Test-Case Format
+Each test case consists of:
+- **Test Name**: Descriptive label (e.g. `Test 1: Example from problem`, `Edge: Zero value`).
+- **Input**: The standard input string passed to `stdin` (or argument to `solve()`).
+- **Expected Output**: The expected standard output string to verify against.
+- **Explanation (Optional)**: Documentation of what edge case or boundary this test targets.
+
+### 3. Comparison Engine
+Outputs are compared robustly using a multi-strategy comparator:
+- **Whitespace Normalization**: Automatically normalizes harmless surrounding whitespace, trailing line-end spaces, and newlines.
+- **Structured JSON & Literal Equivalence**: Deep equality checking for JSON objects, dictionaries, and lists regardless of key order.
+- **Numeric Token Matching with Tolerance**: Floating-point numbers are compared with configurable precision tolerance (`1e-6`).
+- **Unified Diff**: If outputs mismatch, a unified diff (`- expected`, `+ actual`) is generated for debugging.
+
+Tests are **never** marked as `PASS` unless the actual output matches according to the verified comparison rule.
+
+### 4. Status Badges & Error Diagnostics
+- **`PASS`**: Code executed with exit code 0 and actual output matched expected output.
+- **`FAIL`**: Code completed, but output differed from expected output (unified diff displayed).
+- **`ERROR`**: Solution raised an unhandled exception (e.g., `ZeroDivisionError`, `IndexError`). Displays readable exception type, offending line number, and clean traceback.
+- **`TIMEOUT`**: Execution exceeded the 2.0-second time limit (watchdog terminated the process, preventing infinite loops).
+- **`UNVERIFIED`**: Exploratory test run without an expected output; verifies that code executes without crashing or hanging.
+- **Pre-execution Syntax Validation**: Checks Python AST before spawning processes, flagging `SyntaxError` with line numbers immediately.
+
+---
+
+## Security & Sandboxing Architecture
+
+User code is **never** executed inside the Streamlit host process. Every test runs in a dedicated ephemeral subprocess with multi-layer boundaries:
+
+- **macOS Seatbelt Sandbox (`/usr/bin/sandbox-exec`)**:
+  - `(deny network*)`: All incoming and outgoing network sockets are blocked.
+  - `(deny file-write*)`: Filesystem write access is denied everywhere on the machine except inside a temporary scratch directory created for that specific test run.
+- **POSIX Resource Limits (`resource.setrlimit`)**:
+  - CPU time limit (`RLIMIT_CPU`)
+  - File size limit (`RLIMIT_FSIZE`, max 1 MB)
+- **Watchdog Timeout**: Subprocess terminated after 2.0s wall clock.
+- **Output Truncation**: stdout and stderr capped at 50 KB to prevent memory exhaustion attacks.
+- **Process Sanitization**: Executes under `python -I -B -u` with stripped environment variables (`PATH=/usr/bin:/bin`).
+- **Guaranteed Cleanup**: Temporary directories and process handles are always reclaimed in `try...finally` blocks.
+
+---
+
+## Frontend & Workspace
+
+- **Midnight black, electric cobalt, and acid lime styling** with full responsive layout.
+- **Code Editor**: Monaco/Ace editor with syntax highlighting, line numbers, automatic edit syncing, and file upload/download (`solution.py`). Basic text editor available as an accessibility toggle.
+- **Intro Animation**: Nonblocking split-code opening animation over the blurred workspace.
+- **Appearance Switch**: Seamless toggle between Dark and Light mode, preserved in the URL parameter (`?theme=light`).
+- **Workspace Actions**: Includes Load example and Clear with an Undo action.
+- **Test Management**:
+  - Add, edit, and delete multiple custom test cases.
+  - **Extract problem cases**: One-click extraction of `Input:` / `Output:` examples from problem statements.
+  - **Suggest edge cases**: Generates boundary cases (zeros, negatives, single element, duplicates, empty, upper bounds).
+- **Dual Execution Actions**:
+  - **▶ Run all tests**: Executes all test cases independently, displaying an aggregated summary matrix (Total, Passed, Failed, Errors, Timed out).
+  - **🔎 Find failing test**: Identifies and isolates the first failing or crashing test case.
+
+---
+
+## Run Locally
 
 Requires Python 3.10 or newer.
 
 ```sh
-python -m pip install -r requirements.txt
-python -m streamlit run app.py
+# Create and activate virtual environment
+python3 -m venv .venv
+source .venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run Streamlit application
+streamlit run app.py
 ```
+
+### Running Unit Tests
+The test suite covers passes, assertion failures, runtime crashes, infinite loops/timeouts, syntax preflight, whitespace normalization, numeric tolerance, JSON equality, and sandbox isolation:
+
+```sh
+python -m unittest discover -s tests -v
+```
+
+---
 
 ## Deployment
 
@@ -55,25 +120,7 @@ The app is hosted on Streamlit Community Cloud:
 [casecracker-itcq4tjahosrmwkimbbxjd.streamlit.app](https://casecracker-itcq4tjahosrmwkimbbxjd.streamlit.app/).
 
 Deployment configuration:
-
 - Repository: `devf8rge-project/CaseCracker`
 - Branch: `main`
 - Main file: `app.py`
 - Dependencies: `requirements.txt`
-- Theme: `.streamlit/config.toml` and `assets/style.css`
-
-Updates pushed to `main` are picked up by the connected Streamlit deployment.
-
-## Integration status
-
-- **Secure Execution Runner**: Connected and active (`casecracker/runner.py`). Uses native macOS Seatbelt sandboxing (`sandbox-exec`), network denial, isolated ephemeral filesystem, POSIX CPU/file-size resource limits, AST pre-execution verification, and strict execution timeouts.
-- **AI Test Generation**: Boundary stubbed in `casecracker/ai.py` (ready for Gemini/LLM provider integration). The runner automatically extracts examples from problem statements or accepts custom test inputs.
-
-- `app.py`: Streamlit UI, live runner status, workspace, and test execution.
-- `casecracker/runner.py`: Secure sandboxed Python execution engine with OS-level isolation.
-- `casecracker/execution.py`: Execution boundary coordinating test case matching and output comparison.
-- `casecracker/ui.py`: Results panel presentation, comparison diffs, and JSON download.
-- `casecracker/models.py`: Shared result types.
-- `casecracker/ai.py`: AI test suggestion boundary (ready for AI provider).
-- `casecracker/samples.py`: Explicitly synthetic preview data for UI testing.
-- `tests/test_runner.py`: Test suite verifying security constraints, timeouts, and execution correctness.
