@@ -1,10 +1,10 @@
 :root, .stApp {
-  --midnight: #f6f8ff; --surface: #ffffff; --muted: #4c5870; --border: #ccd4e6;
-  --text-color: #162039; --background-color: #f6f8ff;
+  --midnight: #ffffff; --surface: #ffffff; --muted: #4c5870; --border: #ccd4e6;
+  --text-color: #162039; --background-color: #ffffff;
   --secondary-background-color: #eaf0fb; --primary-color: #2454ff;
   color-scheme: light;
 }
-.stApp { background: radial-gradient(ellipse at 80% 8%, #2454ff0b, transparent 36%), #f6f8ff; color: #162039; }
+.stApp { background: #ffffff; color: #162039; }
 .brand { color: #162039 !important; }
 .hero h1, .hero h1 span, .workspace-heading h2, .guide h2, .guide-grid h3, .empty-result h3 { color: #162039; }
 .eyebrow { color: #2548b8; }
@@ -34,6 +34,6 @@ div[data-testid="stTabs"] button { color: #344877; }
 div[data-testid="stTabs"] button[aria-selected="true"] { color: #2448b5; }
 div[data-testid="stAlert"] { color: #162039; background: #e9eeff; }
 div[data-testid="stAlert"] p { color: #162039; }
-header[data-testid="stHeader"] { background: #f6f8fff2; }
+header[data-testid="stHeader"] { background: #ffffff; }
 header[data-testid="stHeader"] button { color: #162039; }
 ::selection { background: #d3ed84; color: #162039; }
