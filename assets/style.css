@@ -50,3 +50,26 @@ a { color: #9bb1ff; }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } button { transition: none !important; } }
 
 .brand-logo { flex-shrink: 0; display: block; }
+
+/* Comfortable touch controls and stacked workspaces on smaller screens. */
+@media (max-width: 900px) {
+  div[data-testid="stHorizontalBlock"] { flex-wrap: wrap; gap: 1rem; }
+  div[data-testid="stHorizontalBlock"] > div[data-testid="stColumn"] { flex: 1 1 100% !important; width: 100% !important; min-width: 0 !important; }
+  .block-container { padding-left: 1.1rem; padding-right: 1.1rem; }
+  .nav-links { flex-wrap: wrap; gap: .5rem 1.2rem; }
+  .nav-links a { display: inline-flex; align-items: center; min-height: 44px; }
+  button { min-height: 44px; }
+  div[data-testid="stTextArea"] textarea { font-size: 16px; }
+  .workspace-heading { align-items: flex-start; gap: .75rem; }
+  .hero-tags { flex-wrap: wrap; gap: .75rem 1.2rem; }
+  .empty-result { min-height: 320px; padding: 2rem .5rem; }
+  .results-label { min-height: auto; margin-top: 1rem; }
+  .preview-banner { line-height: 1.7; }
+  footer { align-items: flex-start; flex-direction: column; }
+}
+@media (max-width: 420px) {
+  .hero h1 { font-size: 2.65rem; }
+  .brand { font-size: 1.1rem; }
+  .workspace-heading { flex-wrap: wrap; }
+  .guide-grid article { padding: 1rem; }
+}

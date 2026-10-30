@@ -21,6 +21,17 @@ as `solution.py`. The Compare output tab highlights textual differences between
 the displayed outputs. Sample results stay fixed and illustrative, regardless
 of the problem or solution entered; they are not generated test results.
 
+Additional workspace tools:
+
+- Upload UTF-8 `.py` files up to 200 KB to replace the editor contents.
+- Expand workspace uses the full page width and a taller editor; it is not a
+  browser fullscreen mode.
+- Save draft downloads the problem and code as a JSON file. Restore draft
+  imports it in a later session. There is no automatic or server-side draft
+  persistence; save before refreshing or closing the page.
+- A custom SVG logo and mobile layouts provide larger touch controls and
+  stacked panels on narrow screens.
+
 ## Run locally
 
 Requires Python 3.10 or newer.
