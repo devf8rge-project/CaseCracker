@@ -5,16 +5,16 @@ import streamlit as st
 
 from casecracker.ai import suggest_test
 from casecracker.editor import render_editor
+from casecracker.examples import EXAMPLES
 from casecracker.execution import find_failing_test
 from casecracker.samples import sample_result
 from casecracker.ui import render_results
 
-EXAMPLE_PROBLEM = "Read n integers and print their sum.\n\nInput: n on the first line, followed by n space-separated integers.\nConstraints: 1 ≤ n ≤ 100000; -1000000 ≤ each integer ≤ 1000000.\nOutput: a single integer, the sum.\n\nExample input:\n3\n-2 0 5\n\nExample output:\n3"
-EXAMPLE_CODE = "# Demo solution with an intentional bug: ignores negative numbers.\nn = int(input())\nvalues = list(map(int, input().split()))\nprint(sum(value for value in values if value > 0))\n"
 
 
 def load_example():
-    st.session_state.update(problem=EXAMPLE_PROBLEM, code=EXAMPLE_CODE, preview=True)
+    problem, code = EXAMPLES[st.session_state.get("example_choice", next(iter(EXAMPLES)))]
+    st.session_state.update(problem=problem, code=code, preview=True)
     st.session_state.editor_revision = st.session_state.get("editor_revision", 0) + 1
     st.session_state.pop("result", None)
 
@@ -40,13 +40,14 @@ st.markdown('''<nav class="topbar" aria-label="Main navigation">
 
 workspace, results = st.columns([1.2, 1], gap="large")
 with workspace:
+    st.selectbox("Example library", list(EXAMPLES), key="example_choice", help="Choose a practice prompt, then click Load example. Loading replaces your current problem and code.")
     toolbar_label, example_action, clear_action = st.columns([2, 1.3, 1])
     with toolbar_label:
         st.markdown('<div class="panel-label">01 &nbsp; / &nbsp; YOUR SOLUTION</div>', unsafe_allow_html=True)
     with example_action:
         st.button("Load example", on_click=load_example, use_container_width=True)
     with clear_action:
-        st.button("Clear", on_click=clear_workspace, use_container_width=True)
+        st.button("Clear", on_click=clear_workspace, use_container_width=True, help="Clears the current problem, code, and results.")
     with st.container(border=True):
         st.text_area("Problem statement", key="problem", height=190, placeholder="What should the program do? Include input/output format, constraints, and examples.", help="Include boundary values and the expected behavior for unusual inputs.")
         render_editor()

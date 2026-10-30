@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+from difflib import unified_diff
 
 import streamlit as st
 
@@ -20,7 +21,7 @@ def render_results(result: SearchResult | None) -> None:
             st.warning("TEMPORARY SAMPLE — illustrative only; unrelated to your submission. No code was run.")
         elif not result.executed:
             st.info("Not executed — runner integration required.")
-        details, explanation = st.tabs(["Test details", "Explanation"])
+        details, comparison, explanation = st.tabs(["Test details", "Compare output", "Explanation"])
         with details:
             if result.test_input is None:
                 st.write(result.message)
@@ -34,6 +35,21 @@ def render_results(result: SearchResult | None) -> None:
                 with actual:
                     st.markdown("**Sample hypothetical output**" if result.is_sample else "**Runner output**")
                     st.code(result.actual_output or "", language="text")
+        with comparison:
+            if result.expected_output is None or result.actual_output is None:
+                st.caption("An output comparison will appear when both expected and actual output are available.")
+            else:
+                st.caption("Illustrative sample comparison — no code was run." if result.is_sample else "Comparison of the outputs reported above.")
+                changes = "\n".join(unified_diff(
+                    result.expected_output.splitlines(), result.actual_output.splitlines(),
+                    fromfile="sample expected" if result.is_sample else "expected",
+                    tofile="sample hypothetical" if result.is_sample else "actual", lineterm="",
+                ))
+                if changes:
+                    st.code(changes, language="diff")
+                    st.caption("− Expected line · + Actual or hypothetical line")
+                else:
+                    st.caption("The displayed output lines match. This view compares text; it does not verify correctness.")
         with explanation:
             st.write(result.message)
             st.caption("A verified failure requires actual runner output and a trusted expected answer.")

@@ -16,6 +16,12 @@ available as an alternative. The editor only edits text and does not run code.
 Results include test details, an explanation tab, and a JSON download that
 preserves the sample and execution status flags.
 
+The example library includes arrays, strings, and sorting prompts. Editor
+settings control font size, line numbers, and line wrapping; code can be saved
+as `solution.py`. The Compare output tab highlights textual differences between
+the displayed outputs. Sample results stay fixed and illustrative, regardless
+of which prompt or solution is selected; they are not generated test results.
+
 ## Run locally
 
 Requires Python 3.10 or newer.
