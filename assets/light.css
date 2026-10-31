@@ -111,39 +111,68 @@ div[data-testid="stTabs"] button[aria-selected="true"] { color: #2448b5; }
 /* ── Radio toggle ── */
 div[data-testid="stRadio"] label:has(input:checked) { background: #ffffff; border-color: #a8b9eb; }
 
-/* ── Text inputs (single-line) ── */
-div[data-baseweb="input"] { background: #ffffff !important; border-color: var(--border-color) !important; }
+/* ── Text inputs (single-line) – target every layer Streamlit renders ── */
+/* outer wrapper */
+div[data-testid="stTextInput"] { background: transparent !important; }
+div[data-testid="stTextInput"] > div,
+div[data-baseweb="base-input"],
+div[data-baseweb="input"],
+div[data-baseweb="input-container"] {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  color: #0f172a !important;
+}
+/* the actual <input> element */
+div[data-testid="stTextInput"] input,
+div[data-baseweb="base-input"] input,
 div[data-baseweb="input"] input {
   background: #ffffff !important;
-  color: var(--text-primary) !important;
+  background-color: #ffffff !important;
+  color: #0f172a !important;
   caret-color: #2454ff !important;
+  -webkit-text-fill-color: #0f172a !important;
 }
+div[data-testid="stTextInput"] input::placeholder,
 div[data-baseweb="input"] input::placeholder { color: #94a3b8 !important; }
 
 /* ── Text areas ── */
-div[data-baseweb="textarea"] { background: #ffffff !important; border-color: var(--border-color) !important; }
+div[data-baseweb="textarea"],
+div[data-testid="stTextArea"] > div { background: #ffffff !important; border-color: #cbd5e1 !important; }
 div[data-testid="stTextArea"] textarea {
   background: #ffffff !important;
-  color: var(--text-primary) !important;
+  color: #0f172a !important;
   caret-color: #2454ff !important;
+  -webkit-text-fill-color: #0f172a !important;
 }
 div[data-testid="stTextArea"] textarea::placeholder { color: #94a3b8 !important; }
 
 /* ── Toast popup ── */
 div[data-testid="stToast"],
 .stToast {
-  background: var(--toast-bg) !important;
-  background-color: var(--toast-bg) !important;
-  color: var(--toast-text) !important;
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  color: #0f172a !important;
   border: 1px solid #e2e8f0 !important;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.10) !important;
+  box-shadow: 0 4px 24px rgba(15,23,42,0.12) !important;
 }
+/* icon circle inside toast */
+div[data-testid="stToast"] > div:first-child,
+div[data-testid="stToast"] [data-testid="stToastDynamicIcon"],
+div[data-testid="stToast"] svg {
+  color: #2454ff !important;
+  fill: #2454ff !important;
+  background: transparent !important;
+}
+/* text nodes */
 div[data-testid="stToast"] *,
 div[data-testid="stToastText"],
 div[data-testid="stToastText"] p,
-.stToast p, .stToast span, .stToast div {
-  color: var(--toast-text) !important;
+.stToast p, .stToast span:not([data-testid="stToastDynamicIcon"]) {
+  color: #0f172a !important;
 }
+/* close button */
+div[data-testid="stToast"] button { color: #64748b !important; background: transparent !important; }
 
 /* ── Tooltip popups ── */
 [data-testid="stTooltipContent"],
@@ -166,6 +195,8 @@ div[data-testid="stVerticalBlockBorderWrapper"] > div,
 div[data-testid="stExpander"] details, div[data-testid="stExpander"] summary,
 div[data-testid="stFileUploaderDropzone"], div[data-testid="stFileUploaderDropzoneInstructions"],
 div[data-baseweb="textarea"], div[data-baseweb="input"],
+div[data-baseweb="base-input"], div[data-baseweb="input-container"],
+div[data-testid="stTextInput"] > div,
 div[data-testid="stTextArea"] textarea,
 .preview-banner, .empty-result, .guide-grid article, .edge-tags span {
   background: #ffffff !important;
