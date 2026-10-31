@@ -12,6 +12,14 @@ from casecracker.runner import execute_code, ExecutionLimits
 
 
 class RemoteRunnerTests(unittest.TestCase):
+    def test_oversized_code_is_rejected_before_host_parsing(self):
+        from casecracker.runner import check_syntax
+        with patch('ast.parse') as parse:
+            valid, message, _ = check_syntax('x' * 200001)
+        self.assertFalse(valid)
+        self.assertIn('200 KB', message)
+        parse.assert_not_called()
+
     def test_public_ui_blocks_unconfigured_execution(self):
         from streamlit.testing.v1 import AppTest
         with patch.dict(os.environ, {'CASECRACKER_RUNNER_BACKEND': 'e2b', 'E2B_API_KEY': '', 'GEMINI_API_KEY': ''}):

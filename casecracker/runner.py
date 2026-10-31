@@ -57,6 +57,8 @@ def check_syntax(code: str) -> tuple[bool, str | None, int | None]:
     Returns:
         (is_valid, error_message, line_number)
     """
+    if len(code.encode('utf-8')) > 200_000:
+        return False, 'Code must be at most 200 KB.', None
     try:
         ast.parse(code)
         return True, None, None
