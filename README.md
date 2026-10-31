@@ -113,13 +113,24 @@ A credential-free template is in `.streamlit/secrets.example.toml`.
 
 After saving secrets and restarting the app:
 
-1. Open **Service connections & setup** and press **Check service connections**.
+1. Open the password-protected owner page (`/?view=owner`), sign in, and press
+   **Check service connections** under **Service connections & setup**.
 2. Confirm both checks pass. No success message is shown before a real check.
 3. Load the execution demo and find the failure.
 4. Request the AI patch and confirm it passes the displayed regression suite.
 
 No live provider verification is possible until credentials are configured.
 Local tests cover adapter behavior with a mocked provider and real worker scripts.
+
+### Owner tools
+
+Setup instructions and connection probes are removed from the public workspace.
+To enable the owner page, add `CASECRACKER_OWNER_PASSWORD` in Streamlit Secrets
+with a unique random password of at least 16 characters. Open the app with
+`?view=owner` and sign in. The URL alone does not grant access. Without that
+setting, the page is locked; Streamlit's deployment dashboard is still available
+to its authorized owners. Sessions expire after one hour, and changing the
+password invalidates existing owner sessions. Sign out when finished.
 
 ## Run Locally
 

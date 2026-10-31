@@ -19,7 +19,7 @@ from casecracker.intro import render_intro
 from casecracker.models import TestCase, TestSuggestion, SearchResult
 from casecracker.runner import is_sandbox_available
 from casecracker.settings import runner_status
-from casecracker.service_ui import render_service_status
+from casecracker.owner_ui import render_owner_page
 from casecracker.samples import sample_result
 from casecracker.ui import render_results
 from casecracker.proof_ui import analyze_reference, render_proof_tools
@@ -103,6 +103,10 @@ def load_proof_demo():
 
 st.set_page_config(page_title="CaseCracker · Find your edge case", page_icon="🔎", layout="wide")
 
+if st.query_params.get("view") == "owner":
+    render_owner_page()
+    st.stop()
+
 
 def remember_appearance():
     st.query_params["theme"] = st.session_state.color_mode.lower()
@@ -124,7 +128,7 @@ sandbox_active = services['backend'] == 'local' and is_sandbox_available()
 if services['remote']:
     runner_badge = '<div class="preview-banner"><strong>HOSTED SANDBOX</strong><span>' + (
         'Configured. Each execution uses a fresh, network-disabled VM.' if services['configured'] else
-        'Awaiting E2B_API_KEY. Public code execution is disabled until configured.') + '</span></div>'
+        'Code execution is temporarily unavailable. Please try again later.') + '</span></div>'
 else:
     runner_badge = '<div class="preview-banner"><strong>LOCAL DEVELOPMENT</strong><span>Local process runner; do not use this backend for untrusted public submissions.</span></div>'
 
@@ -150,8 +154,6 @@ if "test_cases" not in st.session_state:
             "explanation": "Illustrative case with negative and zero integers",
         }
     ]
-
-render_service_status()
 
 expanded = st.toggle("Expand workspace", key="expanded_workspace", help="Use the full page width and a taller editor. Results move below the workspace.")
 if expanded:
@@ -269,7 +271,7 @@ with workspace:
             st.text_area("Trusted reference Python code", key="reference_code", height=220)
             st.text_area("Regression inputs (JSON array of stdin strings)", key="regression_inputs", height=90,
                          placeholder='["3\\n1 2 3", "1\\n-1"]')
-            st.caption("Optional AI: configure GEMINI_API_KEY and CASECRACKER_LLM_MODEL in server secrets. AI calls only happen when explicitly requested.")
+            st.caption("AI analysis is optional and runs only when you request it.")
 
         st.checkbox("Show temporary sample results (illustration only)", key="preview", help="Displays fixed demo data, not a test of your code.")
 
@@ -282,7 +284,7 @@ with workspace:
         st.caption("Execution uses disposable hosted VMs." if services["remote"] else "Local development runner; not suitable for untrusted public code.")
 
     if (run_all_submitted or find_failing_submitted) and not st.session_state.preview and not services['configured']:
-        st.error("Hosted execution is not configured. Add E2B_API_KEY in server secrets. No submitted code was executed.")
+        st.error("Code execution is temporarily unavailable. No submitted code was executed. Please contact the app owner.")
         run_all_submitted = find_failing_submitted = False
 
     if run_all_submitted or find_failing_submitted:
