@@ -116,32 +116,30 @@ if "color_mode" not in st.session_state:
     st.session_state.color_mode = (
         "Light" if st.query_params.get("theme", "dark").lower() == "light" else "Dark"
     )
-st.radio("Appearance", ["Dark", "Light"], horizontal=True, key="color_mode", on_change=remember_appearance)
 st.html(f"<style>{(Path(__file__).parent / 'assets/style.css').read_text()}</style>")
 if st.session_state.color_mode == "Light":
     st.html(f"<style>{(Path(__file__).parent / 'assets/light.css').read_text()}</style>")
-
 logo_data = base64.b64encode((Path(__file__).parent / "assets/logo.svg").read_bytes()).decode("ascii")
 services = runner_status()
 sandbox_active = services['backend'] == 'local' and is_sandbox_available()
-
-if services['remote']:
-    runner_badge = '<div class="preview-banner"><strong>HOSTED SANDBOX</strong><span>' + (
-        'Configured. Each execution uses a fresh, network-disabled VM.' if services['configured'] else
-        'Code execution is temporarily unavailable. Please try again later.') + '</span></div>'
-else:
-    runner_badge = '<div class="preview-banner"><strong>LOCAL DEVELOPMENT</strong><span>Local process runner; do not use this backend for untrusted public submissions.</span></div>'
-
-st.markdown(f'''<nav class="topbar" aria-label="Main navigation">
-<a class="brand" href="#home"><img class="brand-logo" src="data:image/svg+xml;base64,{logo_data}" alt="" width="38" height="38"> CaseCracker<span class="beta">{"SANDBOX" if sandbox_active else "RUNNER"}</span></a>
-<div class="nav-links"><a href="#workspace">Workspace</a><a href="#guide">How it works ↗</a>
-<a href="https://github.com/devf8rge-project/CaseCracker" target="_blank" rel="noopener noreferrer">GitHub ↗</a></div></nav>
-<section class="hero" id="home"><div class="eyebrow"><span class="dot"></span> A WORKSPACE FOR THE WHAT-IFS</div>
-<h1>Find the case<br>you <span>didn’t consider.</span></h1>
-<p>One problem. One solution. A closer look at the boundaries.<br>Put your Python code to the test.</p>
-<a class="workspace-link" href="#workspace">Open workspace <span>↗</span></a><div class="hero-tags"><span>01 / Describe</span><span>02 / Add code</span><span>03 / Inspect</span></div></section>
-{runner_badge}
-<div id="workspace" class="workspace-heading"><div><span class="eyebrow">THE WORKBENCH</span><h2>Your next test starts here.</h2></div><span class="language-tag">Python 3</span></div>''', unsafe_allow_html=True)
+brand_column, appearance_column = st.columns([3, 1])
+with brand_column:
+    st.markdown(f'<a class="brand" href="#home"><img class="brand-logo" src="data:image/svg+xml;base64,{logo_data}" alt="" width="36" height="36">CaseCracker<span class="beta">PYTHON WORKSPACE</span></a>', unsafe_allow_html=True)
+with appearance_column:
+    st.radio("Appearance", ["Dark", "Light"], horizontal=True, key="color_mode", on_change=remember_appearance, label_visibility="collapsed")
+st.markdown('''<nav class="topbar" aria-label="Main navigation"><span class="nav-caption">A LITTLE CURIOSITY. BETTER CODE.</span>
+<div class="nav-links"><a href="#workspace">Workspace</a><a href="#guide">How it works</a><a href="https://github.com/devf8rge-project/CaseCracker" target="_blank" rel="noopener noreferrer">GitHub ↗</a></div></nav>
+<section class="hero" id="home"><div class="hero-copy"><div class="eyebrow"><span class="dot"></span> BUILT FOR THE WHAT-IFS</div>
+<h1>A failing case.<br><span>A clearer answer.</span></h1>
+<p>Test your Python. Reduce the failure.<br>See the evidence behind your next fix.</p>
+<a class="workspace-link" href="#workspace">Open workspace <span>↗</span></a></div>
+<aside class="hero-example" aria-label="Illustrative output comparison"><div class="example-top"><span class="example-dots">● ● ●</span><span>ONE SMALL INPUT</span></div>
+<div class="example-body"><span class="code-comment"># What about a negative number?</span><pre><span class="code-blue">values</span> = [<span class="code-lime">-2</span>]</pre>
+<div class="example-outputs"><div><span>EXPECTED</span><strong>-2</strong></div><div><span>BUGGY OUTPUT</span><strong class="wrong-output">0</strong></div></div>
+<div class="example-note">A small case can reveal a big assumption.</div></div><div class="example-footer">Illustrative example · no code run here</div></aside></section>
+<div id="workspace" class="workspace-heading"><div><span class="eyebrow">YOUR WORKSPACE</span><h2>Let’s look a little closer.</h2></div><div class="workspace-steps"><span class="current-step">01 Write</span><span>02 Test</span><span>03 Understand</span></div></div>''', unsafe_allow_html=True)
+if not services['configured']:
+    st.info("Code execution is temporarily unavailable. Please try again later.")
 
 # Initialize test cases in session state
 if "test_cases" not in st.session_state:
@@ -173,26 +171,24 @@ with workspace:
         st.button("Undo clear", on_click=undo_clear, help="Restore the problem and code you just cleared.")
 
     with st.container(border=True):
-        st.text_area("Problem statement", key="problem", height=180, placeholder="What should the program do? Include input/output format, constraints, and examples.", help="Include boundary values and the expected behavior for unusual inputs.")
+        st.text_area("Problem statement", key="problem", height=130, placeholder="What should the program do? Include input/output format, constraints, and examples.", help="Include boundary values and the expected behavior for unusual inputs.")
         render_editor()
 
         # Multiple Test Cases Expander
-        with st.expander(f"Test cases ({len(st.session_state.test_cases)})", expanded=True):
-            st.markdown(
-                '<p style="font-size: 0.82rem; color: #94a3b8; margin-bottom: 0.75rem;">'
-                '<strong>Execution Contract:</strong> Your code can read standard input via <code>input()</code> or '
-                '<code>sys.stdin.read()</code> and print to stdout, <em>or</em> define <code>def solve(input_data): return ...</code>. '
-                'Both modes are executed independently in isolated sandboxes.'
-                '</p>',
-                unsafe_allow_html=True,
-            )
+        with st.container(border=True):
+            st.markdown(f"### Test cases · {len(st.session_state.test_cases)}")
+            st.caption("Add an input and the answer you expect. Scripts and solve(input_data) functions are supported.")
+            if st.session_state.get("reference_code", "").strip():
+                st.caption("A reference solution is set: its output supplies the expected answers.")
 
             tool_c1, tool_c2, tool_c3 = st.columns([1.2, 1.5, 1.5])
             with tool_c1:
-                if st.button("➕ Add test", key="btn_add_test", use_container_width=True):
+                if st.button("＋ Add test", key="btn_add_test", use_container_width=True):
+                    new_id = f"tc_{uuid.uuid4().hex[:6]}"
+                    st.session_state.active_test_id = new_id
                     next_idx = len(st.session_state.test_cases) + 1
                     st.session_state.test_cases.append({
-                        "id": f"tc_{uuid.uuid4().hex[:6]}",
+                        "id": new_id,
                         "name": f"Test {next_idx}",
                         "input": "",
                         "expected_output": "",
@@ -201,7 +197,7 @@ with workspace:
                     st.rerun()
 
             with tool_c2:
-                if st.button("📋 Extract problem cases", key="btn_extract_cases", use_container_width=True):
+                if st.button("Extract examples", key="btn_extract_cases", use_container_width=True, help="Extract Input/Output examples from the problem. Replaces the current test cases."):
                     extracted = extract_test_cases_from_problem(st.session_state.get("problem", ""))
                     if extracted:
                         st.session_state.test_cases = [tc.to_dict() for tc in extracted]
@@ -211,16 +207,18 @@ with workspace:
                         st.toast("No 'Input:' and 'Output:' examples detected in problem statement.", icon="⚠️")
 
             with tool_c3:
-                if st.button("⚡ Suggest edge cases", key="btn_suggest_edges", use_container_width=True):
+                if st.button("Suggest edge cases", key="btn_suggest_edges", use_container_width=True, help="Adds preset boundary inputs without running code. Review them against your problem constraints."):
                     boundary_cases = generate_boundary_test_cases(st.session_state.get("problem", ""))
-                    st.session_state.test_cases.extend([bc.to_dict() for bc in boundary_cases])
-                    st.toast(f"Added {len(boundary_cases)} boundary edge cases to test suite!", icon="⚡")
+                    existing = {(tc.get("input", ""), tc.get("expected_output", "")) for tc in st.session_state.test_cases}
+                    additions = [bc.to_dict() for bc in boundary_cases if (bc.input, bc.expected_output) not in existing]
+                    st.session_state.test_cases.extend(additions)
+                    st.toast(f"Added {len(additions)} new edge cases." if additions else "These edge cases are already in your suite.", icon="⚡")
                     st.rerun()
 
             # Render each test case editor
             to_delete_idx = None
             for idx, tc in enumerate(st.session_state.test_cases):
-                with st.container(border=True):
+                with st.expander(f"{idx + 1:02d} · {tc.get('name', 'Untitled test')}", expanded=(len(st.session_state.test_cases) == 1 or tc['id'] == st.session_state.get('active_test_id'))):
                     row1_col1, row1_col2 = st.columns([4.2, 0.8])
                     with row1_col1:
                         tc["name"] = st.text_input(
@@ -273,13 +271,14 @@ with workspace:
                          placeholder='["3\\n1 2 3", "1\\n-1"]')
             st.caption("AI analysis is optional and runs only when you request it.")
 
-        st.checkbox("Show temporary sample results (illustration only)", key="preview", help="Displays fixed demo data, not a test of your code.")
+        with st.expander("Illustrative preview"):
+            st.checkbox("Show temporary sample results (illustration only)", key="preview", help="Displays fixed demo data, not a test of your code.")
 
         btn_c1, btn_c2 = st.columns(2)
         with btn_c1:
-            run_all_submitted = st.button("▶ Run all tests", type="primary", use_container_width=True)
+            run_all_submitted = st.button("▶ Run all tests", use_container_width=True, help="Run every supplied test and inspect the results.")
         with btn_c2:
-            find_failing_submitted = st.button("🔎 Find failing test", use_container_width=True)
+            find_failing_submitted = st.button("🔎 Find failing test", type="primary", use_container_width=True, help="Look for a reproducible failure. Add a reference solution to enable shrinking and traces.")
 
         st.caption("Execution uses disposable hosted VMs." if services["remote"] else "Local development runner; not suitable for untrusted public code.")
 

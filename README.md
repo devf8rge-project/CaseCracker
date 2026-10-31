@@ -78,6 +78,10 @@ check and the execution demo after adding credentials; observe actual results.
 
 ## Frontend & Workspace
 
+- **Compact layout**: Header-level theme controls, a clearly labeled illustrative
+  comparison, collapsible test cards, and a primary Find failing test action.
+  Repeated edge-case suggestions skip cases already present in the suite.
+  Real result summaries include unverified cases alongside passes and failures.
 - **Midnight black, electric cobalt, and acid lime styling** with full responsive layout.
 - **Code Editor**: Monaco/Ace editor with syntax highlighting, line numbers, automatic edit syncing, and file upload/download (`solution.py`). Basic text editor available as an accessibility toggle.
 - **Intro Animation**: Nonblocking split-code opening animation over the blurred workspace.

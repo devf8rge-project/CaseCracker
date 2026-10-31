@@ -55,3 +55,12 @@ div[data-testid="stCode"], div[data-testid="stCode"] pre,
 div[data-testid="stCode"] code, div[data-testid="stAlert"] {
   background: #ffffff !important;
 }
+
+/* Light palette for the compact comparison card and real result metrics. */
+:root, .stApp { --ink: #162039; }
+.hero-example { background: #ffffff; border-color: #bbc8e8; box-shadow: 0 16px 40px #18284b0a; }
+.code-blue { color: #2548b8; }
+.code-lime { color: #4c6500; }
+.example-outputs .wrong-output { color: #aa2443; }
+.current-step, .stat strong, .example-outputs strong { color: #162039; }
+div[data-testid="stRadio"] label:has(input:checked) { background: #ffffff; border-color: #a8b9eb; }

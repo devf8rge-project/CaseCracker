@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from html import escape
 import streamlit as st
 
 from casecracker.models import SearchResult, TestResult, TestStatus, TestSuiteResult
@@ -45,7 +46,7 @@ def _render_test_card(test_res: TestResult, index: int, default_expanded: bool =
     with st.expander(f"{test_res.status.value} · {title}", expanded=default_expanded):
         st.markdown(
             f'<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">'
-            f'<div><strong>{test_res.test_case.name}</strong></div>'
+            f'<div><strong>{escape(test_res.test_case.name)}</strong></div>'
             f'<div>{badge} &nbsp; <span style="color: #94a3b8; font-size: 0.8rem;">⏱️ {test_res.execution_time_ms:.1f} ms</span></div>'
             f'</div>',
             unsafe_allow_html=True,
@@ -105,17 +106,11 @@ def _render_test_card(test_res: TestResult, index: int, default_expanded: bool =
 
 def _render_suite_summary(suite: TestSuiteResult) -> None:
     """Render top-level summary metrics for a test suite run."""
-    c1, c2, c3, c4, c5 = st.columns(5)
-    with c1:
-        st.metric("Total Tests", suite.total_tests)
-    with c2:
-        st.metric("Passed", suite.passed_count)
-    with c3:
-        st.metric("Failed", suite.failed_count)
-    with c4:
-        st.metric("Errors", suite.error_count)
-    with c5:
-        st.metric("Timed Out", suite.timeout_count)
+    counts = [('Total', suite.total_tests), ('Passed', suite.passed_count),
+              ('Failed', suite.failed_count), ('Errors', suite.error_count),
+              ('Timed out', suite.timeout_count), ('Unverified', suite.unverified_count)]
+    cards = ''.join(f'<div class="stat"><span>{label}</span><strong>{value}</strong></div>' for label, value in counts)
+    st.markdown(f'<div class="stat-grid">{cards}</div>', unsafe_allow_html=True)
 
     sandbox_label = "Isolated runner" if suite.sandboxed else "Local process limits"
     st.caption(
@@ -130,8 +125,8 @@ def render_results(result: SearchResult | None) -> None:
         if result is None:
             st.markdown(
                 '''<div class="empty-result"><div class="orbit"><span>⌕</span></div>
-<div class="eyebrow">READY WHEN YOU ARE</div><h3>A small input.<br>A new perspective.</h3>
-<p>Your test results will appear here. Add test cases and click <strong>Run all tests</strong> or <strong>Find failing test</strong>.</p>
+<div class="eyebrow">YOUR NEXT CLUE</div><h3>The evidence goes here.</h3>
+<p>Add your code and a test case. We’ll show what happened, what was expected, and where to look next.</p>
 <div class="empty-status">No tests executed yet</div></div>''',
                 unsafe_allow_html=True,
             )
