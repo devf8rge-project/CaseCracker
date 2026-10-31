@@ -1,74 +1,62 @@
-/* =========================================================
-   Light-mode CSS palette & component overrides for CaseCracker
-   ========================================================= */
+/* =======================================================
+   Light-mode CSS overrides for CaseCracker
+   Loaded AFTER style.css only when color_mode == "Light"
+   Uses hard-coded values (no variable indirection) so
+   Streamlit's dark base theme is fully overridden.
+   ======================================================= */
 
-/* ── CSS variable palette ── */
+/* ── Root palette ── */
 :root, .stApp {
-  --midnight: #ffffff;
-  --surface: #f8fafc;
-  --muted: #475569;       /* Slate-600 – darkened for legibility */
-  --border: #cbd5e1;
-  --ink: #0f172a;         /* Slate-900 */
-  --text-color: #0f172a;
-  --background-color: #ffffff;
-  --secondary-background-color: #f1f5f9;
-  --primary-color: #2454ff;
-  /* theme-specific tokens */
-  --bg-surface: #ffffff;
-  --bg-input: #ffffff;
-  --text-primary: #0f172a;
-  --text-secondary: #475569;
-  --border-color: #cbd5e1;
-  --code-bg: #f1f5f9;
-  --code-text: #0f172a;
-  --toast-bg: #ffffff;
-  --toast-text: #0f172a;
+  --midnight: #ffffff; --surface: #f8fafc; --muted: #475569; --border: #cbd5e1;
+  --ink: #0f172a; --cobalt: #2454ff; --lime: #84cc16;
+  --text-color: #0f172a; --background-color: #ffffff;
+  --secondary-background-color: #f1f5f9; --primary-color: #2454ff;
   color-scheme: only light !important;
 }
 
-/* ── Base colours ── */
+/* ── Hard reset for html/body so Streamlit's dark base is overridden ── */
 html, body, #root {
   color-scheme: only light !important;
   background: #ffffff !important;
-  color: var(--text-primary);
+  color: #0f172a !important;
 }
-.stApp { background: var(--bg-surface); color: var(--text-primary); }
+.stApp { background: #ffffff !important; color: #0f172a !important; }
 
 /* ── Brand / nav ── */
-.brand { color: var(--text-primary) !important; }
+.brand { color: #0f172a !important; }
 .eyebrow { color: #2548b8; }
 .beta, .language-tag { color: #3a4b70; border-color: #bac7e2; }
+.hero-tags, .panel-label, footer, .empty-status { color: #475569; }
 .dot { background: #527000; }
-.nav-caption, .hero-tags, .panel-label, footer, .empty-status { color: var(--text-secondary); }
 .nav-links a, a { color: #2448b5; }
 .nav-links a:hover { color: #132f83; }
 
 /* ── Headings ── */
-.hero h1, .hero h1 span, .workspace-heading h2, .guide h2, .guide-grid h3, .empty-result h3 { color: var(--text-primary); }
+.hero h1, .hero h1 span, .workspace-heading h2, .guide h2, .guide-grid h3, .empty-result h3 { color: #0f172a; }
 
 /* ── Preview banner ── */
 .preview-banner { color: #344877; background: #e9eeff; border-color: #b1c2f7; border-left-color: #2454ff; }
 .preview-banner strong { color: #2548b8; }
 
-/* ── Guide grid / form cards ── */
-.guide-grid article, div[data-testid="stForm"] { background: #ffffff; border-color: var(--border-color); }
+/* ── Guide grid / forms ── */
+.guide-grid article, div[data-testid="stForm"] { background: #ffffff; border-color: #cbd5e1; }
 .guide-grid article > span, .orbit span { color: #526e00; }
 .orbit { border-color: #9eb0e2; }
 .edge-tags span { color: #3a4b70; border-color: #c1cce1; background: #edf2fc; }
 
-/* ── Streamlit generic markdown / labels ── */
+/* ── Streamlit markdown / widget labels / captions ── */
 div[data-testid="stMarkdownContainer"],
 div[data-testid="stWidgetLabel"],
-label, h1, h2, h3 { color: var(--text-primary); }
-div[data-testid="stCaptionContainer"] { color: var(--text-secondary) !important; }
+label, h1, h2, h3 { color: #0f172a; }
+div[data-testid="stCaptionContainer"] { color: #475569 !important; }
 
-/* ── Alert box ── */
-div[data-testid="stAlert"] { color: var(--text-primary); background: #e9eeff; }
-div[data-testid="stAlert"] p { color: var(--text-primary); }
+/* ── Alert ── */
+div[data-testid="stAlert"] { color: #0f172a; background: #e9eeff; }
+div[data-testid="stAlert"] p { color: #0f172a; }
 
 /* ── Header ── */
 header[data-testid="stHeader"] { background: #ffffff; }
-header[data-testid="stHeader"] button { color: var(--text-primary); }
+header[data-testid="stHeader"] button { color: #0f172a; }
 
 /* ── Buttons ── */
 button[kind="secondary"], button[kind="tertiary"],
@@ -81,19 +69,20 @@ div[data-testid="stDownloadButton"] button:hover {
 }
 
 /* ── Expander ── */
-div[data-testid="stExpander"] details { background: #ffffff; border-color: var(--border-color); color: var(--text-primary); }
-div[data-testid="stExpander"] summary { color: var(--text-primary); }
+div[data-testid="stExpander"] details { background: #ffffff; border-color: #cbd5e1; color: #0f172a; }
+div[data-testid="stExpander"] summary { color: #0f172a; }
 
 /* ── File uploader ── */
-div[data-testid="stFileUploaderDropzone"] { background: #f1f5f9; color: var(--text-primary); }
-div[data-testid="stFileUploaderDropzone"] small { color: var(--text-secondary); }
+div[data-testid="stFileUploaderDropzone"] { background: #f1f5f9; color: #0f172a; }
+div[data-testid="stFileUploaderDropzone"] small { color: #475569; }
 
-/* ── Static code blocks ── */
+/* ── Code blocks ── */
 div[data-testid="stCode"], div[data-testid="stCode"] pre,
-div[data-testid="stCode"] code { background: #f1f5f9 !important; color: var(--text-primary) !important; }
+div[data-testid="stCode"] code { background: #f1f5f9 !important; color: #0f172a !important; }
 
-/* ── Inline code badges ── */
-.stMarkdown code, div[data-testid="stMarkdownContainer"] code,
+/* ── Inline code badges (Execution Contract etc.) ── */
+.stMarkdown code,
+div[data-testid="stMarkdownContainer"] code,
 div[data-testid="stCaptionContainer"] code,
 p code, li code {
   background: #ecfdf5 !important;
@@ -111,9 +100,18 @@ div[data-testid="stTabs"] button[aria-selected="true"] { color: #2448b5; }
 /* ── Radio toggle ── */
 div[data-testid="stRadio"] label:has(input:checked) { background: #ffffff; border-color: #a8b9eb; }
 
-/* ── Text inputs (single-line) – target every layer Streamlit renders ── */
-/* outer wrapper */
-div[data-testid="stTextInput"] { background: transparent !important; }
+/* ── Text areas (multiline) ── */
+div[data-baseweb="textarea"],
+div[data-testid="stTextArea"] > div { background: #ffffff !important; border-color: #cbd5e1 !important; }
+div[data-testid="stTextArea"] textarea {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  -webkit-text-fill-color: #0f172a !important;
+  caret-color: #2454ff !important;
+}
+div[data-testid="stTextArea"] textarea::placeholder { color: #94a3b8 !important; }
+
+/* ── Text inputs (single-line) ── */
 div[data-testid="stTextInput"] > div,
 div[data-baseweb="base-input"],
 div[data-baseweb="input"],
@@ -121,58 +119,32 @@ div[data-baseweb="input-container"] {
   background: #ffffff !important;
   background-color: #ffffff !important;
   border-color: #cbd5e1 !important;
-  color: #0f172a !important;
 }
-/* the actual <input> element */
 div[data-testid="stTextInput"] input,
 div[data-baseweb="base-input"] input,
 div[data-baseweb="input"] input {
   background: #ffffff !important;
   background-color: #ffffff !important;
   color: #0f172a !important;
-  caret-color: #2454ff !important;
   -webkit-text-fill-color: #0f172a !important;
-}
-div[data-testid="stTextInput"] input::placeholder,
-div[data-baseweb="input"] input::placeholder { color: #94a3b8 !important; }
-
-/* ── Text areas ── */
-div[data-baseweb="textarea"],
-div[data-testid="stTextArea"] > div { background: #ffffff !important; border-color: #cbd5e1 !important; }
-div[data-testid="stTextArea"] textarea {
-  background: #ffffff !important;
-  color: #0f172a !important;
   caret-color: #2454ff !important;
-  -webkit-text-fill-color: #0f172a !important;
 }
-div[data-testid="stTextArea"] textarea::placeholder { color: #94a3b8 !important; }
+div[data-testid="stTextInput"] input::placeholder { color: #94a3b8 !important; }
 
 /* ── Toast popup ── */
-div[data-testid="stToast"],
-.stToast {
+div[data-testid="stToast"], .stToast {
   background: #ffffff !important;
   background-color: #ffffff !important;
   color: #0f172a !important;
   border: 1px solid #e2e8f0 !important;
   box-shadow: 0 4px 24px rgba(15,23,42,0.12) !important;
 }
-/* icon circle inside toast */
-div[data-testid="stToast"] > div:first-child,
-div[data-testid="stToast"] [data-testid="stToastDynamicIcon"],
-div[data-testid="stToast"] svg {
-  color: #2454ff !important;
-  fill: #2454ff !important;
-  background: transparent !important;
-}
-/* text nodes */
 div[data-testid="stToast"] *,
 div[data-testid="stToastText"],
-div[data-testid="stToastText"] p,
-.stToast p, .stToast span:not([data-testid="stToastDynamicIcon"]) {
-  color: #0f172a !important;
-}
-/* close button */
-div[data-testid="stToast"] button { color: #64748b !important; background: transparent !important; }
+div[data-testid="stToastText"] p { color: #0f172a !important; }
+div[data-testid="stToast"] [data-testid="stToastDynamicIcon"],
+div[data-testid="stToast"] svg { color: #2454ff !important; fill: #2454ff !important; background: transparent !important; }
+div[data-testid="stToast"] button { color: #64748b !important; background: transparent !important; border: none !important; }
 
 /* ── Tooltip popups ── */
 [data-testid="stTooltipContent"],
@@ -185,17 +157,30 @@ div[data-testid="stToast"] button { color: #64748b !important; background: trans
   font-weight: 500 !important;
   border-radius: 6px !important;
 }
-/* Hover target wrapper should stay transparent */
 .stTooltipHoverTarget { background: transparent !important; }
 
-/* ── White washes – force light surface across all containers ── */
-.stApp, div[data-testid="stAppViewContainer"], section[data-testid="stMain"],
-header[data-testid="stHeader"], div[data-testid="stMainBlockContainer"],
+/* ── Ace editor gutter (light theme) ── */
+.ace_gutter { background: #f1f5f9 !important; border-right: 1px solid #e2e8f0 !important; }
+.ace_gutter-cell { color: #64748b !important; }
+
+/* ────────────────────────────────────────────────────────
+   FORCE WHITE BACKGROUND across every Streamlit container.
+   Must come LAST so it wins over Streamlit's dark overrides.
+   ──────────────────────────────────────────────────────── */
+.stApp,
+div[data-testid="stAppViewContainer"],
+section[data-testid="stMain"],
+header[data-testid="stHeader"],
+div[data-testid="stMainBlockContainer"],
 div[data-testid="stVerticalBlockBorderWrapper"] > div,
-div[data-testid="stExpander"] details, div[data-testid="stExpander"] summary,
-div[data-testid="stFileUploaderDropzone"], div[data-testid="stFileUploaderDropzoneInstructions"],
-div[data-baseweb="textarea"], div[data-baseweb="input"],
-div[data-baseweb="base-input"], div[data-baseweb="input-container"],
+div[data-testid="stExpander"] details,
+div[data-testid="stExpander"] summary,
+div[data-testid="stFileUploaderDropzone"],
+div[data-testid="stFileUploaderDropzoneInstructions"],
+div[data-baseweb="textarea"],
+div[data-baseweb="input"],
+div[data-baseweb="base-input"],
+div[data-baseweb="input-container"],
 div[data-testid="stTextInput"] > div,
 div[data-testid="stTextArea"] textarea,
 .preview-banner, .empty-result, .guide-grid article, .edge-tags span {
@@ -203,16 +188,17 @@ div[data-testid="stTextArea"] textarea,
   background-image: none !important;
 }
 
-/* hero example card */
+/* Static code blocks inside stAlert – keep slightly tinted */
+div[data-testid="stCode"], div[data-testid="stCode"] pre,
+div[data-testid="stCode"] code { background: #f1f5f9 !important; }
+
+/* ── Comparison card / stat grid ── */
+:root, .stApp { --ink: #0f172a; }
 .hero-example { background: #ffffff; border-color: #bbc8e8; box-shadow: 0 16px 40px #18284b0a; }
 .code-blue { color: #2548b8; }
 .code-lime { color: #4c6500; }
 .example-outputs .wrong-output { color: #aa2443; }
-.current-step, .stat strong, .example-outputs strong { color: var(--text-primary); }
-
-/* ── Ace editor gutter fix ── */
-.ace_gutter { background: #f1f5f9 !important; border-right: 1px solid #e2e8f0 !important; }
-.ace_gutter-cell { color: #64748b !important; }
+.current-step, .stat strong, .example-outputs strong { color: #0f172a; }
 
 /* ── Selection ── */
-::selection { background: #d3ed84; color: #162039; }
+::selection { background: #d3ed84; color: #0f172a; }

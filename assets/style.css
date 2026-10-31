@@ -1,17 +1,4 @@
-:root {
-  --midnight: #080a12; --surface: #101522; --cobalt: #2855ff; --lime: #c6ff00;
-  --muted: #a3adc2; --border: #293045; --ink: #edf0fa;
-  /* theme-aware palette – dark defaults; light.css overrides all of these */
-  --bg-surface: #080a12;
-  --bg-input: #0b0f19;
-  --text-primary: #edf0fa;
-  --text-secondary: #a3adc2;
-  --border-color: #293045;
-  --code-bg: #101522;
-  --code-text: #c6ff00;
-  --toast-bg: #1a2035;
-  --toast-text: #f8fafc;
-}
+:root { --midnight: #080a12; --surface: #101522; --cobalt: #2855ff; --lime: #c6ff00; --muted: #a3adc2; --border: #293045; --ink: #edf0fa; }
 html { scroll-behavior: smooth; scroll-padding-top: 4rem; }
 .block-container { max-width: 1340px; padding: 5rem 2.8rem 1rem; }
 .stApp { background: var(--midnight); color: var(--ink); }
@@ -53,8 +40,7 @@ html { scroll-behavior: smooth; scroll-padding-top: 4rem; }
 .panel-label { font-size: .65rem; letter-spacing: .12em; color: var(--muted); font-weight: 650; padding: .65rem 0; }
 .results-label { min-height: 3.2rem; }
 div[data-testid="stVerticalBlockBorderWrapper"] > div, div[data-testid="stExpander"] details { border-color: var(--border); border-radius: 12px; }
-div[data-testid="stTextArea"] textarea { background: var(--bg-input); color: var(--text-primary); caret-color: var(--lime); font: .85rem/1.65 ui-monospace, SFMono-Regular, Consolas, monospace; border-radius: 8px; }
-div[data-baseweb="input"] input { background: var(--bg-input); color: var(--text-primary); }
+div[data-testid="stTextArea"] textarea { background: #0b0f19; color: var(--ink); caret-color: var(--lime); font: .85rem/1.65 ui-monospace, SFMono-Regular, Consolas, monospace; border-radius: 8px; }
 div[data-baseweb="textarea"]:focus-within { box-shadow: 0 0 0 2px #2855ff50; }
 button, a, textarea, input { touch-action: manipulation; }
 button, .workspace-link, .hero-example, .guide-grid article, .brand-logo { transition: transform 150ms ease, border-color 150ms ease, box-shadow 150ms ease, background-color 150ms ease; }
