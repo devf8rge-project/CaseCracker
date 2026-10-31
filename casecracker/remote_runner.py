@@ -1,6 +1,7 @@
 """Disposable, network-disabled E2B runner. Never falls back to host execution."""
 from dataclasses import asdict
 import json
+import math
 import re
 from pathlib import Path
 import time
@@ -43,8 +44,11 @@ def execute_remote(code, stdin_input, limits):
         ]:
             sandbox.files.write('/home/user/' + destination, content, request_timeout=request_budget())
         phase = 'executing worker'
+        # e2b-connect 2.5 serializes seconds as str(timeout * 1000).
+        # Floats produce an invalid Connect-Timeout-Ms value such as 7000.0.
+        command_timeout = max(1, math.ceil(min(limits.timeout_seconds + 5, request_budget())))
         command = sandbox.commands.run('python3 -I -B /home/user/cc_worker.py',
-                                       timeout=min(limits.timeout_seconds + 5, request_budget()), request_timeout=request_budget())
+                                       timeout=command_timeout, request_timeout=request_budget())
         phase = 'reading worker result'
         data = json.loads(command.stdout)
         # Only the existing bounded runner result schema is accepted.

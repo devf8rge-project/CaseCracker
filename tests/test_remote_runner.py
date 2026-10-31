@@ -63,6 +63,8 @@ class RemoteRunnerTests(unittest.TestCase):
                 Path(folder, Path(path).name).write_text(content)
             sandbox.files.write.side_effect = write
             def run(command, **kwargs):
+                self.assertIs(type(kwargs['timeout']), int)
+                self.assertTrue(str(kwargs['timeout'] * 1000).isdigit())
                 proc = subprocess.run([sys.executable,'-I','-B',str(Path(folder,'cc_worker.py'))],capture_output=True,text=True,timeout=8)
                 self.assertEqual(proc.returncode,0,proc.stderr)
                 return SimpleNamespace(stdout=proc.stdout)
