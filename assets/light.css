@@ -102,53 +102,112 @@ div[data-testid="stRadio"] label:has(input:checked) { background: #ffffff; borde
 
 /* ── Toggle switch (st.toggle) ── */
 /* Track: OFF state → visible slate-gray pill */
+div[data-testid="stCheckbox"] label[data-baseweb="checkbox"] > div:first-child,
+div[data-testid="stCheckbox"] label[data-baseweb="checkbox"] > div:first-of-type,
+div[data-testid="stCheckbox"] label > div:first-child,
+div[data-testid="stCheckbox"] label > div:first-of-type,
+label[data-baseweb="checkbox"] > div:first-child,
+label[data-baseweb="checkbox"] > div:first-of-type,
+label[data-baseweb="checkbox"] > span:first-child,
+div[data-testid="stCheckbox"] input[type="checkbox"]:not(:checked) + div,
+div[data-testid="stCheckbox"] input[type="checkbox"]:not(:checked) ~ div:first-of-type,
 div[data-testid="stToggle"] label div[role="switch"],
 div[data-testid="stToggle"] [data-baseweb="checkbox"] span:first-of-type,
 div[data-testid="stToggle"] span[data-checked="false"] {
-  background-color: #cbd5e1 !important;
-  border: 1px solid #94a3b8 !important;
+  background-color: #CBD5E1 !important;
+  border: 1.5px solid #64748B !important;
+  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.15) !important;
 }
-/* Track: ON state → accent blue pill */
-div[data-testid="stToggle"] [aria-checked="true"] > span:first-of-type,
-div[data-testid="stToggle"] span[data-checked="true"] {
-  background-color: #2563eb !important;
-  border-color: #2563eb !important;
-}
-/* Thumb/knob (the sliding circle) — always white so it contrasts both states */
+
+/* Knob / thumb: OFF state → crisp white knob with drop shadow */
+div[data-testid="stCheckbox"] label[data-baseweb="checkbox"] > div:first-child > div,
+div[data-testid="stCheckbox"] label[data-baseweb="checkbox"] > div:first-of-type > div,
+div[data-testid="stCheckbox"] label > div:first-child > div,
+div[data-testid="stCheckbox"] label > div:first-of-type > div,
+label[data-baseweb="checkbox"] > div:first-child > div,
+label[data-baseweb="checkbox"] > div:first-of-type > div,
+label[data-baseweb="checkbox"] > span:first-child > span,
+div[data-testid="stCheckbox"] input[type="checkbox"]:not(:checked) + div > div,
+div[data-testid="stCheckbox"] input[type="checkbox"]:not(:checked) ~ div:first-of-type > div,
 div[data-testid="stToggle"] label div[role="switch"]::after,
 div[data-testid="stToggle"] [data-baseweb="checkbox"] span:first-of-type::after,
-div[data-testid="stToggle"] span[data-checked] svg,
 div[data-testid="stToggle"] [class*="thumb"],
 div[data-testid="stToggle"] [class*="Thumb"] {
-  background-color: #ffffff !important;
-  box-shadow: 0 1px 3px rgba(15,23,42,0.25) !important;
+  background-color: #FFFFFF !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.35) !important;
 }
+
+/* Track: ON state → vibrant primary blue pill */
+div[data-testid="stCheckbox"] label[data-baseweb="checkbox"]:has(input:checked) > div:first-child,
+div[data-testid="stCheckbox"] label[data-baseweb="checkbox"]:has(input:checked) > div:first-of-type,
+div[data-testid="stCheckbox"] label:has(input:checked) > div:first-child,
+div[data-testid="stCheckbox"] label:has(input:checked) > div:first-of-type,
+label[data-baseweb="checkbox"]:has(input:checked) > div:first-child,
+label[data-baseweb="checkbox"]:has(input:checked) > div:first-of-type,
+label[data-baseweb="checkbox"]:has(input:checked) > span:first-child,
+div[data-testid="stCheckbox"] input[type="checkbox"]:checked + div,
+div[data-testid="stCheckbox"] input[type="checkbox"]:checked ~ div:first-of-type,
+div[data-testid="stCheckbox"] [aria-checked="true"] > div:first-child,
+div[data-testid="stToggle"] [aria-checked="true"] > span:first-of-type,
+div[data-testid="stToggle"] span[data-checked="true"] {
+  background-color: #2563EB !important;
+  border: 1.5px solid #1D4ED8 !important;
+  box-shadow: none !important;
+}
+
+/* Knob / thumb: ON state → crisp white knob */
+div[data-testid="stCheckbox"] label[data-baseweb="checkbox"]:has(input:checked) > div:first-child > div,
+div[data-testid="stCheckbox"] label[data-baseweb="checkbox"]:has(input:checked) > div:first-of-type > div,
+div[data-testid="stCheckbox"] label:has(input:checked) > div:first-child > div,
+div[data-testid="stCheckbox"] label:has(input:checked) > div:first-of-type > div,
+label[data-baseweb="checkbox"]:has(input:checked) > div:first-child > div,
+label[data-baseweb="checkbox"]:has(input:checked) > div:first-of-type > div,
+label[data-baseweb="checkbox"]:has(input:checked) > span:first-child > span,
+div[data-testid="stCheckbox"] input[type="checkbox"]:checked + div > div,
+div[data-testid="stCheckbox"] input[type="checkbox"]:checked ~ div:first-of-type > div {
+  background-color: #FFFFFF !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.35) !important;
+}
+
 /* Toggle label text */
-div[data-testid="stToggle"] label span { color: #0f172a !important; }
+div[data-testid="stCheckbox"] label span,
+div[data-testid="stCheckbox"] label p,
+div[data-testid="stToggle"] label span {
+  color: #0F172A !important;
+  font-weight: 500 !important;
+}
 
 /* ── Help / tooltip trigger icon (the ? circle) ── */
 [data-testid="stTooltipIcon"],
 [data-testid="stWidgetLabelHelp"],
-button[data-testid="stTooltipIcon"],
-button[data-testid="stWidgetLabelHelp"] {
+div[data-testid="stTooltipHoverTarget"],
+div[data-testid="stCheckbox"] [data-testid="stTooltipIcon"],
+div[data-testid="stCheckbox"] [data-testid="stTooltipHoverTarget"],
+div[data-testid="stCheckbox"] button {
   color: #475569 !important;
-  border-color: #cbd5e1 !important;
-  background: #f1f5f9 !important;
-  border-radius: 50% !important;
 }
 [data-testid="stTooltipIcon"] svg,
-[data-testid="stWidgetLabelHelp"] svg {
+[data-testid="stWidgetLabelHelp"] svg,
+div[data-testid="stTooltipHoverTarget"] svg,
+div[data-testid="stCheckbox"] svg {
+  color: #475569 !important;
   stroke: #475569 !important;
-  fill: none !important;
+  fill: transparent !important;
 }
-[data-testid="stTooltipIcon"]:hover,
-[data-testid="stWidgetLabelHelp"]:hover {
-  color: #0f172a !important;
-  background: #e2e8f0 !important;
+[data-testid="stTooltipIcon"] svg *,
+[data-testid="stWidgetLabelHelp"] svg *,
+div[data-testid="stTooltipHoverTarget"] svg *,
+div[data-testid="stCheckbox"] svg * {
+  stroke: #475569 !important;
 }
 [data-testid="stTooltipIcon"]:hover svg,
-[data-testid="stWidgetLabelHelp"]:hover svg {
-  stroke: #0f172a !important;
+[data-testid="stTooltipIcon"]:hover svg *,
+[data-testid="stTooltipHoverTarget"]:hover svg,
+[data-testid="stTooltipHoverTarget"]:hover svg *,
+div[data-testid="stCheckbox"] [data-testid="stTooltipHoverTarget"]:hover svg,
+div[data-testid="stCheckbox"] [data-testid="stTooltipHoverTarget"]:hover svg * {
+  color: #0F172A !important;
+  stroke: #0F172A !important;
 }
 
 /* ── Text areas (multiline) ── */
