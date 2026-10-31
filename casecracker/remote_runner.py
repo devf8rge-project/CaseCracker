@@ -26,20 +26,25 @@ def execute_remote(code, stdin_input, limits):
         return unavailable('Hosted runner not configured. Add E2B_API_KEY to server secrets. No submitted code was executed.')
     if len(code.encode('utf-8')) > 200_000 or len(stdin_input.encode('utf-8')) > 200_000:
         return unavailable('Code and input must each be at most 200 KB. No submitted code was executed.')
+    phase = 'loading SDK'
     try:
         from e2b import Sandbox
         # Each execution gets a fresh VM: no cross-user or cross-test reuse.
+        phase = 'creating sandbox'
         sandbox = Sandbox.create(api_key=api_key, secure=True, allow_internet_access=False,
                                  timeout=20, request_timeout=request_budget())
         root = Path(__file__).parent
+        phase = 'uploading worker'
         for destination, content in [
             ('cc_engine.py', (root / 'runner.py').read_text()),
             ('cc_worker.py', (root / '_remote_worker.py').read_text()),
             ('cc_request.json', json.dumps({'code': code, 'input': stdin_input, 'limits': asdict(limits)})),
         ]:
             sandbox.files.write('/home/user/' + destination, content, request_timeout=request_budget())
+        phase = 'executing worker'
         command = sandbox.commands.run('python3 -I -B /home/user/cc_worker.py',
                                        timeout=min(limits.timeout_seconds + 5, request_budget()), request_timeout=request_budget())
+        phase = 'reading worker result'
         data = json.loads(command.stdout)
         # Only the existing bounded runner result schema is accepted.
         if not isinstance(data, dict) or type(data.get('success')) is not bool or not isinstance(data.get('stdout'), str):
@@ -49,9 +54,12 @@ def execute_remote(code, stdin_input, limits):
         result['sandboxed'] = True
         result['mode_used'] = 'solve_function' if has_solve_function(code) else 'stdin_stdout'
         return ExecutionResult(**result)
-    except Exception:
+    except Exception as exc:
         # SDK exceptions can include credential-bearing URLs: never display them.
-        return unavailable('Hosted runner could not complete this request. Check credentials, quota, or connectivity. No local fallback was used.')
+        status = getattr(exc, 'status_code', None)
+        code = f' HTTP {status}' if type(status) is int else ''
+        kind = type(exc).__name__[:60]
+        return unavailable(f'Hosted runner failed while {phase} ({kind}{code}). Check provider credentials, credits, and connectivity. No local fallback was used.')
     finally:
         if sandbox is not None:
             try:

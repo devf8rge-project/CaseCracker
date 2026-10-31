@@ -37,8 +37,8 @@ def make_llm(api_key=None, model=None):
             return output
         except urllib.error.HTTPError as exc:
             raise ValueError(f'LLM provider returned HTTP {exc.code}. Check model, quota, and credentials.') from None
-        except Exception:
-            raise ValueError('LLM response unavailable, timed out, or invalid. No verification claimed.') from None
+        except Exception as exc:
+            raise ValueError(f'LLM response unavailable or invalid ({type(exc).__name__}). No verification claimed.') from None
     return generate
 
 
