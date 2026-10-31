@@ -120,6 +120,7 @@ st.html(f"<style>{(Path(__file__).parent / 'assets/style.css').read_text()}</sty
 if st.session_state.color_mode == "Light":
     st.html(f"<style>{(Path(__file__).parent / 'assets/light.css').read_text()}</style>")
 logo_data = base64.b64encode((Path(__file__).parent / "assets/logo.svg").read_bytes()).decode("ascii")
+st.html(f"<style>:root{{--casecracker-watermark: url('data:image/svg+xml;base64,{logo_data}');}}</style>")
 services = runner_status()
 sandbox_active = services['backend'] == 'local' and is_sandbox_available()
 brand_column, appearance_column = st.columns([3, 1])

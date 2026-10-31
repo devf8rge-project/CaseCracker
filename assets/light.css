@@ -57,6 +57,8 @@ div[data-testid="stCode"] code, div[data-testid="stAlert"] {
 }
 
 /* Light palette for the compact comparison card and real result metrics. */
+section[data-testid="stMain"]::before { opacity: .035; }
+div[data-testid="stMainBlockContainer"] { background: transparent !important; }
 :root, .stApp { --ink: #162039; }
 .hero-example { background: #ffffff; border-color: #bbc8e8; box-shadow: 0 16px 40px #18284b0a; }
 .code-blue { color: #2548b8; }
