@@ -16,7 +16,7 @@ import urllib.request
 
 def make_llm(api_key=None, model=None):
     api_key = api_key or os.environ.get('GEMINI_API_KEY')
-    model = model or os.environ.get('CASECRACKER_LLM_MODEL', 'gemini-2.5-flash')
+    model = model or os.environ.get('CASECRACKER_LLM_MODEL', 'gemini-flash-latest')
     if not api_key:
         raise ValueError('AI is not configured. Add GEMINI_API_KEY to server secrets or environment.')
     if not re.fullmatch(r'[a-zA-Z0-9._-]+', model):

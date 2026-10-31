@@ -11,7 +11,7 @@ def render_service_status():
         st.caption('Keys stay in server secrets. Configuration alone does not confirm a working connection.')
         if not status['configured'] or not status['ai_configured']:
             st.markdown('In Streamlit → Manage app → Settings → Secrets, add:')
-            st.code('GEMINI_API_KEY = "your-ai-key"\nE2B_API_KEY = "your-sandbox-key"\nCASECRACKER_RUNNER_BACKEND = "e2b"\nCASECRACKER_LLM_MODEL = "gemini-2.5-flash"', language='toml')
+            st.code('GEMINI_API_KEY = "your-ai-key"\nE2B_API_KEY = "your-sandbox-key"\nCASECRACKER_RUNNER_BACKEND = "e2b"\nCASECRACKER_LLM_MODEL = "gemini-flash-latest"', language='toml')
             st.markdown('[Get an AI key](https://aistudio.google.com/apikey) · [Get a sandbox key](https://e2b.dev/dashboard)')
         st.caption('Check connections sends a small AI request and starts one short-lived sandbox; provider usage may be charged.')
         if st.button('Check service connections'):

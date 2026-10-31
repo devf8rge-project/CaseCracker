@@ -102,7 +102,7 @@ real keys. Do not paste keys into chat or commit them to GitHub.
 GEMINI_API_KEY = "your-ai-key"
 E2B_API_KEY = "your-sandbox-key"
 CASECRACKER_RUNNER_BACKEND = "e2b"
-CASECRACKER_LLM_MODEL = "gemini-2.5-flash"
+CASECRACKER_LLM_MODEL = "gemini-flash-latest"
 ```
 
 Get keys from [Google AI Studio](https://aistudio.google.com/apikey) and the
@@ -179,7 +179,7 @@ Set these in environment variables or `.streamlit/secrets.toml` (never commit ke
 
 ```toml
 GEMINI_API_KEY = "your-key"
-CASECRACKER_LLM_MODEL = "gemini-2.5-flash"
+CASECRACKER_LLM_MODEL = "gemini-flash-latest"
 ```
 
 The adapter in `casecracker/ai_helper.py` uses Google's
