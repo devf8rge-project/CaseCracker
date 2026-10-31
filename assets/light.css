@@ -100,6 +100,57 @@ div[data-testid="stTabs"] button[aria-selected="true"] { color: #2448b5; }
 /* ── Radio toggle ── */
 div[data-testid="stRadio"] label:has(input:checked) { background: #ffffff; border-color: #a8b9eb; }
 
+/* ── Toggle switch (st.toggle) ── */
+/* Track: OFF state → visible slate-gray pill */
+div[data-testid="stToggle"] label div[role="switch"],
+div[data-testid="stToggle"] [data-baseweb="checkbox"] span:first-of-type,
+div[data-testid="stToggle"] span[data-checked="false"] {
+  background-color: #cbd5e1 !important;
+  border: 1px solid #94a3b8 !important;
+}
+/* Track: ON state → accent blue pill */
+div[data-testid="stToggle"] [aria-checked="true"] > span:first-of-type,
+div[data-testid="stToggle"] span[data-checked="true"] {
+  background-color: #2563eb !important;
+  border-color: #2563eb !important;
+}
+/* Thumb/knob (the sliding circle) — always white so it contrasts both states */
+div[data-testid="stToggle"] label div[role="switch"]::after,
+div[data-testid="stToggle"] [data-baseweb="checkbox"] span:first-of-type::after,
+div[data-testid="stToggle"] span[data-checked] svg,
+div[data-testid="stToggle"] [class*="thumb"],
+div[data-testid="stToggle"] [class*="Thumb"] {
+  background-color: #ffffff !important;
+  box-shadow: 0 1px 3px rgba(15,23,42,0.25) !important;
+}
+/* Toggle label text */
+div[data-testid="stToggle"] label span { color: #0f172a !important; }
+
+/* ── Help / tooltip trigger icon (the ? circle) ── */
+[data-testid="stTooltipIcon"],
+[data-testid="stWidgetLabelHelp"],
+button[data-testid="stTooltipIcon"],
+button[data-testid="stWidgetLabelHelp"] {
+  color: #475569 !important;
+  border-color: #cbd5e1 !important;
+  background: #f1f5f9 !important;
+  border-radius: 50% !important;
+}
+[data-testid="stTooltipIcon"] svg,
+[data-testid="stWidgetLabelHelp"] svg {
+  stroke: #475569 !important;
+  fill: none !important;
+}
+[data-testid="stTooltipIcon"]:hover,
+[data-testid="stWidgetLabelHelp"]:hover {
+  color: #0f172a !important;
+  background: #e2e8f0 !important;
+}
+[data-testid="stTooltipIcon"]:hover svg,
+[data-testid="stWidgetLabelHelp"]:hover svg {
+  stroke: #0f172a !important;
+}
+
 /* ── Text areas (multiline) ── */
 div[data-baseweb="textarea"],
 div[data-testid="stTextArea"] > div { background: #ffffff !important; border-color: #cbd5e1 !important; }
