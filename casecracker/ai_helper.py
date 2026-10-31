@@ -28,7 +28,7 @@ def make_llm(api_key=None, model=None):
                              'generationConfig': {'responseMimeType': 'application/json', 'temperature': 0}}).encode(),
             headers={'Content-Type': 'application/json', 'x-goog-api-key': api_key}, method='POST')
         try:
-            with urllib.request.urlopen(request, timeout=25) as response:
+            with urllib.request.urlopen(request, timeout=45) as response:
                 data = json.loads(response.read(512_000))
             text = ''.join(p.get('text', '') for p in data['candidates'][0]['content']['parts'])
             output = json.loads(text)

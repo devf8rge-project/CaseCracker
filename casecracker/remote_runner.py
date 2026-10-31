@@ -1,6 +1,7 @@
 """Disposable, network-disabled E2B runner. Never falls back to host execution."""
 from dataclasses import asdict
 import json
+import re
 from pathlib import Path
 import time
 
@@ -59,7 +60,11 @@ def execute_remote(code, stdin_input, limits):
         status = getattr(exc, 'status_code', None)
         code = f' HTTP {status}' if type(status) is int else ''
         kind = type(exc).__name__[:60]
-        return unavailable(f'Hosted runner failed while {phase} ({kind}{code}). Check provider credentials, credits, and connectivity. No local fallback was used.')
+        detail = str(exc).replace(api_key, '[redacted]')
+        detail = re.sub(r'https?://\S+', '[endpoint]', detail)
+        detail = re.sub(r'[A-Za-z0-9_.=\-]{24,}', '[redacted]', detail)
+        detail = ' '.join(detail.split())[:240]
+        return unavailable(f'Hosted runner failed while {phase} ({kind}{code}): {detail}. No local fallback was used.')
     finally:
         if sandbox is not None:
             try:
