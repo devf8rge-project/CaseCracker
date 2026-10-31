@@ -9,7 +9,7 @@ import os
 from pathlib import Path
 import platform
 import resource
-import shutil
+import signal
 import subprocess
 import sys
 import tempfile
@@ -21,6 +21,7 @@ class ExecutionLimits:
     timeout_seconds: float = 2.0
     max_output_bytes: int = 50 * 1024  # 50 KB limit on stdout/stderr
     max_file_size_bytes: int = 1024 * 1024  # 1 MB max file creation limit
+    max_memory_bytes: int = 512 * 1024 * 1024
 
 
 @dataclass(frozen=True)
@@ -119,6 +120,13 @@ def execute_code(
             except (ValueError, OSError):
                 pass
 
+            # RLIMIT_AS is not usable on macOS; report platform limitations in docs.
+            if platform.system() != "Darwin" and hasattr(resource, "RLIMIT_AS"):
+                try:
+                    resource.setrlimit(resource.RLIMIT_AS, (limits.max_memory_bytes, limits.max_memory_bytes))
+                except (ValueError, OSError):
+                    pass
+
             # Enforce max file creation size
             try:
                 resource.setrlimit(
@@ -139,16 +147,29 @@ def execute_code(
 
         start_time = time.perf_counter()
         try:
-            proc = subprocess.run(
-                cmd,
-                input=stdin_input,
-                text=True,
-                capture_output=True,
-                timeout=limits.timeout_seconds,
-                preexec_fn=configure_limits if hasattr(os, "fork") else None,
-                cwd=scratch_dir,
-                env=sanitized_env,
-            )
+            # Disk-backed streams avoid capture_output accumulating unlimited RAM.
+            with tempfile.TemporaryFile() as input_file, tempfile.TemporaryFile() as out_file, tempfile.TemporaryFile() as err_file:
+                input_file.write(stdin_input.encode("utf-8"))
+                input_file.seek(0)
+                proc = subprocess.Popen(
+                    cmd, stdin=input_file, stdout=out_file, stderr=err_file,
+                    preexec_fn=configure_limits if hasattr(os, "fork") else None,
+                    cwd=scratch_dir, env=sanitized_env, start_new_session=True,
+                )
+                try:
+                    proc.wait(timeout=limits.timeout_seconds)
+                finally:
+                    try:
+                        os.killpg(proc.pid, signal.SIGKILL)
+                    except ProcessLookupError:
+                        pass
+                    proc.wait()
+                out_file.seek(0)
+                err_file.seek(0)
+                stdout_bytes = out_file.read(limits.max_output_bytes + 1)
+                stderr_bytes = err_file.read(limits.max_output_bytes + 1)
+                proc.stdout = stdout_bytes.decode("utf-8", errors="replace")
+                proc.stderr = stderr_bytes.decode("utf-8", errors="replace")
             duration_ms = (time.perf_counter() - start_time) * 1000.0
 
             # Output stream bounding
@@ -205,3 +226,26 @@ def execute_code(
                 error_message=f"Execution error: {exc}",
                 sandboxed=sandbox_enabled,
             )
+
+
+def trace_code(code: str, stdin_input: str = "", *, timeout_seconds: float = 1.0) -> dict:
+    """Capture at most 100 child-process events; never trace in the app process."""
+    import json
+    try:
+        ast.parse(code)
+        template = Path(__file__).with_name('_trace_script.py').read_text()
+        script = template.replace('__SOURCE_LITERAL__', repr(code), 1)
+        result = execute_code(script, stdin_input, ExecutionLimits(
+            timeout_seconds=timeout_seconds, max_output_bytes=512 * 1024,
+        ))
+        if not result.success:
+            return {"steps": [], "error": result.error_message or result.stderr,
+                    "timed_out": result.timed_out, "sandboxed": result.sandboxed}
+        payload = json.loads(result.stdout)
+        if not isinstance(payload, dict) or not isinstance(payload.get('steps'), list):
+            raise ValueError('Invalid trace')
+        payload['steps'] = payload['steps'][:100]
+        payload['sandboxed'] = result.sandboxed
+        return payload
+    except Exception:
+        return {"steps": [], "error": "Trace unavailable or invalid; use the normal execution result."}

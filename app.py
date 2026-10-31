@@ -13,6 +13,7 @@ from casecracker.models import TestSuggestion
 from casecracker.runner import is_sandbox_available
 from casecracker.samples import sample_result
 from casecracker.ui import render_results
+from casecracker.proof_ui import analyze_reference, render_proof_tools
 
 
 def load_example():
@@ -20,6 +21,8 @@ def load_example():
     st.session_state.update(problem=problem, code=code, preview=True)
     st.session_state.editor_revision = st.session_state.get("editor_revision", 0) + 1
     st.session_state.pop("result", None)
+    for key in ("proof_bundle", "verified_patch", "blind_guess"):
+        st.session_state.pop(key, None)
 
 
 def clear_workspace():
@@ -27,11 +30,26 @@ def clear_workspace():
     st.session_state.update(problem="", code="", preview=False, custom_input="", custom_expected="")
     st.session_state.editor_revision = st.session_state.get("editor_revision", 0) + 1
     st.session_state.pop("result", None)
+    for key in ("proof_bundle", "verified_patch", "blind_guess"):
+        st.session_state.pop(key, None)
 
 
 def undo_clear():
     st.session_state.update(st.session_state.pop("cleared_workspace", {}))
     st.session_state.editor_revision = st.session_state.get("editor_revision", 0) + 1
+
+
+def load_proof_demo():
+    reference = "n = int(input())\nvalues = list(map(int, input().split()))\nassert n >= 1 and len(values) == n\ntotal = 0\nfor value in values:\n    total += value\nprint(total)\n"
+    st.session_state.update(
+        problem="Read n integers and print their sum. n >= 1; negative values are valid.",
+        code=reference.replace("total += value", "total += max(value, 0)"),
+        reference_code=reference, custom_input="6\n8 -9 4 -2 7 0",
+        regression_inputs='["1\\n0", "3\\n1 2 3", "2\\n-1 -2"]', preview=False,
+    )
+    st.session_state.editor_revision = st.session_state.get("editor_revision", 0) + 1
+    for key in ("result", "proof_bundle", "verified_patch", "blind_guess"):
+        st.session_state.pop(key, None)
 
 
 st.set_page_config(page_title="CaseCracker · Find your edge case", page_icon="🔎", layout="wide")
@@ -107,23 +125,43 @@ with workspace:
                 help="Expected output to verify against your program's stdout.",
             )
 
+        with st.expander("Execution proof · reference solution & regression tests"):
+            st.caption("Supply a trusted reference to enable automatic shrinking, traces, and optional AI patch verification. Reference code must reject inputs outside the problem constraints.")
+            st.button("Load execution demo", on_click=load_proof_demo)
+            st.text_area("Trusted reference Python code", key="reference_code", height=220)
+            st.text_area("Regression inputs (JSON array of stdin strings)", key="regression_inputs", height=90,
+                         placeholder='["3\\n1 2 3", "1\\n-1"]')
+            st.caption("Optional AI: configure GEMINI_API_KEY and CASECRACKER_LLM_MODEL in server secrets. AI calls only happen when explicitly requested.")
+
         st.checkbox("Show temporary sample results (illustration only)", key="preview", help="Displays fixed demo data, not a test of your code.")
         submitted = st.button("Find failing test →", type="primary", use_container_width=True)
         st.caption("Sample mode shows illustrative data." if st.session_state.get("preview") else ("Network and filesystem isolation enabled on this host." if sandbox_active else "Process limits enabled. Network and filesystem sandboxing unavailable on this host."))
 
     if submitted:
         st.session_state.pop("result", None)
+        for key in ("proof_bundle", "verified_patch", "blind_guess"):
+            st.session_state.pop(key, None)
         problem_val = st.session_state.get("problem", "").strip()
         code_val = st.session_state.get("code", "").strip()
         custom_in = st.session_state.get("custom_input", "").strip()
         custom_exp = st.session_state.get("custom_expected", "").strip()
 
-        if not problem_val and not custom_in:
+        if not problem_val and not custom_in and not st.session_state.get("regression_inputs", "").strip():
             st.warning("Add a problem statement or custom test case to continue.")
         elif not code_val:
             st.warning("Add your Python code to continue.")
         elif st.session_state.preview:
             st.session_state.result = sample_result()
+        elif st.session_state.get("reference_code", "").strip():
+            try:
+                with st.spinner("Comparing, shrinking, and recording bounded traces…"):
+                    result, bundle = analyze_reference(
+                        problem_val, code_val, st.session_state.reference_code.strip(),
+                        st.session_state.get("custom_input", ""), st.session_state.get("regression_inputs", ""))
+                st.session_state.result = result
+                st.session_state.proof_bundle = bundle
+            except Exception as exc:
+                st.error(f"Reference analysis unavailable: {exc}")
         else:
             if custom_in:
                 suggestion = TestSuggestion(
@@ -145,6 +183,8 @@ with results:
         st.markdown("**Look beyond the happy path**")
         st.caption("Good edge cases start at the boundaries of the problem’s valid inputs.")
         st.markdown('<div class="edge-tags"><span>Minimum size</span><span>Repeated values</span><span>Zero & negatives</span><span>Upper limits</span></div>', unsafe_allow_html=True)
+
+render_proof_tools()
 
 st.markdown(f'''<section id="guide" class="guide"><div class="eyebrow">KEEP IT SIMPLE</div><h2>Three steps. Nothing extra.</h2><div class="guide-grid">
 <article><span>01</span><h3>Set the scene</h3><p>Describe the goal, constraints, and exactly what a correct answer looks like.</p></article>

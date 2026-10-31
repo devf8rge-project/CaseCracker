@@ -23,7 +23,9 @@ def render_results(result: SearchResult | None) -> None:
         elif not result.executed:
             st.info(result.message)
         else:
-            if result.passed:
+            if result.passed is None:
+                st.info(result.message)
+            elif result.passed:
                 st.success(result.message)
             else:
                 st.error(result.message)
@@ -68,7 +70,9 @@ def render_results(result: SearchResult | None) -> None:
         with explanation:
             st.write(result.message)
             if result.executed:
-                if result.passed:
+                if result.passed is None:
+                    st.caption("Execution completed without a trusted expected answer; correctness was not checked.")
+                elif result.passed:
                     st.caption("Verified against output under sandboxed execution limits.")
                 else:
                     st.caption("A verified failing test detected by the execution runner.")

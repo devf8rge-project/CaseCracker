@@ -83,8 +83,8 @@ def find_failing_test(
         else:
             return SearchResult(
                 executed=True,
-                passed=True,
-                message="⚡ Executed successfully in secure sandbox. Output recorded.",
+                passed=None,
+                message="Executed successfully. Output recorded; no expected answer was provided for comparison.",
                 test_input=suggestion.test_input,
                 expected_output=None,
                 actual_output=actual,
@@ -130,7 +130,7 @@ def find_failing_test(
         first_in, first_out = examples[0]
         return SearchResult(
             executed=True,
-            passed=True,
+                passed=True,
             message=f"🟢 Passed all {len(examples)} sample test case(s) found in the problem description!",
             test_input=first_in,
             expected_output=first_out,
