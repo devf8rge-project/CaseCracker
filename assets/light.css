@@ -296,7 +296,7 @@ div[role="tooltip"] * {
    ──────────────────────────────────────────────────────── */
 .stApp,
 div[data-testid="stAppViewContainer"],
-section[data-testid="stMain"],
+[data-testid="stMain"],
 header[data-testid="stHeader"],
 div[data-testid="stMainBlockContainer"],
 div[data-testid="stVerticalBlockBorderWrapper"] > div,
@@ -331,5 +331,5 @@ div[data-testid="stCode"] code { background: #f1f5f9 !important; }
 ::selection { background: #d3ed84; color: #0f172a; }
 
 /* Faint watermark behind the workspace; panels retain white surfaces. */
-section[data-testid="stMain"]::before { opacity: .035; }
+[data-testid="stMain"]::before { opacity: .05; }
 div[data-testid="stMainBlockContainer"] { background: transparent !important; }
