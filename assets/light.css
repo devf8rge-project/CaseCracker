@@ -147,17 +147,34 @@ div[data-testid="stToast"] svg { color: #2454ff !important; fill: #2454ff !impor
 div[data-testid="stToast"] button { color: #64748b !important; background: transparent !important; border: none !important; }
 
 /* ── Tooltip popups ── */
-[data-testid="stTooltipContent"],
+div[data-testid="stTooltipContent"],
+div[data-testid="stTooltipErrorContent"],
 .stTooltipContent,
-[role="tooltip"],
+.stTooltipErrorContent,
+div[role="tooltip"],
+div[role="tooltip"] > div,
 [data-baseweb="tooltip"] div,
 [data-baseweb="popover"] div {
-  background: #0f172a !important;
+  background: #1e293b !important;
+  background-color: #1e293b !important;
   color: #ffffff !important;
-  font-weight: 500 !important;
+  font-weight: 600 !important;
+  border: 1px solid #334155 !important;
   border-radius: 6px !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
 }
-.stTooltipHoverTarget { background: transparent !important; }
+/* Force ALL descendants (incl. stMarkdownContainer) to white — must override the
+   global "div[data-testid=stMarkdownContainer] { color: #0f172a }" rule above */
+div[data-testid="stTooltipContent"] *,
+div[data-testid="stTooltipErrorContent"] *,
+.stTooltipContent *,
+div[role="tooltip"] * {
+  color: #ffffff !important;
+  background: transparent !important;
+}
+/* Hover target wrapper stays transparent */
+.stTooltipHoverTarget,
+.stTooltipHoverTarget * { background: transparent !important; }
 
 /* ── Ace editor gutter (light theme) ── */
 .ace_gutter { background: #f1f5f9 !important; border-right: 1px solid #e2e8f0 !important; }
