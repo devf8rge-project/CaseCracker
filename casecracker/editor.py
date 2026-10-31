@@ -41,7 +41,7 @@ def render_editor() -> None:
     if plain:
         value = st.text_area("Python code", value=st.session_state.get("code", ""), height=height, key=f"plain_code_{revision}", label_visibility="collapsed", placeholder="# Paste your complete Python solution here…")
     else:
-        theme = "chrome" if st.session_state.get("color_mode") == "Light" else "tomorrow_night"
+        theme = "xcode" if st.session_state.get("color_mode") == "Light" else "tomorrow_night"
         value = st_ace(value=st.session_state.get("code", ""), language="python", theme=theme, key=f"python_editor_{revision}", font_size=font_size, tab_size=4, show_gutter=show_gutter, show_print_margin=False, wrap=wrap, auto_update=True, min_lines=16, height=height)
     if value is not None:
         st.session_state.code = value
