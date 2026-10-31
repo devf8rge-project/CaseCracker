@@ -57,18 +57,22 @@ Tests are **never** marked as `PASS` unless the actual output matches according 
 
 ## Security & Sandboxing Architecture
 
-User code is **never** executed inside the Streamlit host process. Every test runs in a dedicated ephemeral subprocess with multi-layer boundaries:
+Public deployments default to **E2B disposable VMs**, not host subprocesses.
+Each code execution gets a fresh VM with outbound internet disabled and a
+20-second lifetime. The remote worker clears its environment and uses the
+existing execution engine for CPU/file limits, a Linux 512 MB address-space
+limit, per-program timeouts, process-group termination, and bounded output.
+API keys are not uploaded or forwarded to submitted programs. VM cleanup is
+attempted on both success and failure, with VM lifetime as a cleanup backstop.
+Missing credentials or provider errors **never fall back to local execution**.
 
-- **macOS Seatbelt Sandbox (`/usr/bin/sandbox-exec`)**:
-  - `(deny network*)`: All incoming and outgoing network sockets are blocked.
-  - `(deny file-write*)`: Filesystem write access is denied everywhere on the machine except inside a temporary scratch directory created for that specific test run.
-- **POSIX Resource Limits (`resource.setrlimit`)**:
-  - CPU time limit (`RLIMIT_CPU`)
-  - File size limit (`RLIMIT_FSIZE`, max 1 MB)
-- **Watchdog Timeout**: Subprocess terminated after 2.0s wall clock.
-- **Output Truncation**: stdout and stderr capped at 50 KB to prevent memory exhaustion attacks.
-- **Process Sanitization**: Executes under `python -I -B -u` with stripped environment variables (`PATH=/usr/bin:/bin`).
-- **Guaranteed Cleanup**: Temporary directories and process handles are always reclaimed in `try...finally` blocks.
+The local runner remains available only through an explicit
+`CASECRACKER_RUNNER_BACKEND=local` setting for trusted development code.
+Its macOS Seatbelt policy permits host reads and is not suitable for hostile
+public code. Do not select the local backend on Streamlit Cloud.
+
+Provider configuration is not evidence of a working service. Use the connection
+check and the execution demo after adding credentials; observe actual results.
 
 ---
 
@@ -89,6 +93,34 @@ User code is **never** executed inside the Streamlit host process. Every test ru
 
 ---
 
+## Connect hosted services
+
+In Streamlit → Manage app → Settings → Secrets, paste the settings below with
+real keys. Do not paste keys into chat or commit them to GitHub.
+
+```toml
+GEMINI_API_KEY = "your-ai-key"
+E2B_API_KEY = "your-sandbox-key"
+CASECRACKER_RUNNER_BACKEND = "e2b"
+CASECRACKER_LLM_MODEL = "gemini-2.5-flash"
+```
+
+Get keys from [Google AI Studio](https://aistudio.google.com/apikey) and the
+[E2B dashboard](https://e2b.dev/dashboard). Both services may charge for usage.
+The pinned E2B SDK supports
+[network-disabled sandbox creation](https://docs.e2b.dev/sdk-reference/python-sdk/v2.5.0/sandbox_sync).
+A credential-free template is in `.streamlit/secrets.example.toml`.
+
+After saving secrets and restarting the app:
+
+1. Open **Service connections & setup** and press **Check service connections**.
+2. Confirm both checks pass. No success message is shown before a real check.
+3. Load the execution demo and find the failure.
+4. Request the AI patch and confirm it passes the displayed regression suite.
+
+No live provider verification is possible until credentials are configured.
+Local tests cover adapter behavior with a mocked provider and real worker scripts.
+
 ## Run Locally
 
 Requires Python 3.10 or newer.
@@ -101,8 +133,11 @@ source .venv/bin/activate
 # Install dependencies
 pip install -r requirements.txt
 
-# Run Streamlit application
+# With provider credentials in local secrets.toml:
 streamlit run app.py
+
+# OR trusted-code local development only:
+CASECRACKER_RUNNER_BACKEND=local streamlit run app.py
 ```
 
 ### Running Unit Tests

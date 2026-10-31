@@ -1,3 +1,6 @@
+import os
+os.environ.setdefault('CASECRACKER_RUNNER_BACKEND', 'local')
+
 import unittest
 from unittest.mock import patch
 from streamlit.testing.v1 import AppTest

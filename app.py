@@ -18,6 +18,8 @@ from casecracker.execution import (
 from casecracker.intro import render_intro
 from casecracker.models import TestCase, TestSuggestion, SearchResult
 from casecracker.runner import is_sandbox_available
+from casecracker.settings import runner_status
+from casecracker.service_ui import render_service_status
 from casecracker.samples import sample_result
 from casecracker.ui import render_results
 from casecracker.proof_ui import analyze_reference, render_proof_tools
@@ -116,15 +118,15 @@ if st.session_state.color_mode == "Light":
     st.html(f"<style>{(Path(__file__).parent / 'assets/light.css').read_text()}</style>")
 
 logo_data = base64.b64encode((Path(__file__).parent / "assets/logo.svg").read_bytes()).decode("ascii")
-sandbox_active = is_sandbox_available()
+services = runner_status()
+sandbox_active = services['backend'] == 'local' and is_sandbox_available()
 
-runner_badge = (
-    '<div class="preview-banner runner-active"><strong>SECURE RUNNER ACTIVE</strong>'
-    '<span>macOS Seatbelt sandbox enabled with network isolation, resource bounds, and execution timeouts.</span></div>'
-    if sandbox_active
-    else '<div class="preview-banner"><strong>LOCAL RUNNER ACTIVE</strong>'
-    '<span>Subprocess execution with resource limits and timeouts.</span></div>'
-)
+if services['remote']:
+    runner_badge = '<div class="preview-banner"><strong>HOSTED SANDBOX</strong><span>' + (
+        'Configured. Each execution uses a fresh, network-disabled VM.' if services['configured'] else
+        'Awaiting E2B_API_KEY. Public code execution is disabled until configured.') + '</span></div>'
+else:
+    runner_badge = '<div class="preview-banner"><strong>LOCAL DEVELOPMENT</strong><span>Local process runner; do not use this backend for untrusted public submissions.</span></div>'
 
 st.markdown(f'''<nav class="topbar" aria-label="Main navigation">
 <a class="brand" href="#home"><img class="brand-logo" src="data:image/svg+xml;base64,{logo_data}" alt="" width="38" height="38"> CaseCracker<span class="beta">{"SANDBOX" if sandbox_active else "RUNNER"}</span></a>
@@ -148,6 +150,8 @@ if "test_cases" not in st.session_state:
             "explanation": "Illustrative case with negative and zero integers",
         }
     ]
+
+render_service_status()
 
 expanded = st.toggle("Expand workspace", key="expanded_workspace", help="Use the full page width and a taller editor. Results move below the workspace.")
 if expanded:
@@ -275,7 +279,11 @@ with workspace:
         with btn_c2:
             find_failing_submitted = st.button("🔎 Find failing test", use_container_width=True)
 
-        st.caption("OS sandbox active on this host." if sandbox_active else "Process limits only; OS sandbox unavailable on this host.")
+        st.caption("Execution uses disposable hosted VMs." if services["remote"] else "Local development runner; not suitable for untrusted public code.")
+
+    if (run_all_submitted or find_failing_submitted) and not st.session_state.preview and not services['configured']:
+        st.error("Hosted execution is not configured. Add E2B_API_KEY in server secrets. No submitted code was executed.")
+        run_all_submitted = find_failing_submitted = False
 
     if run_all_submitted or find_failing_submitted:
         for key in ("proof_bundle", "verified_patch", "blind_guess"):
@@ -364,7 +372,7 @@ st.markdown(f'''<section id="guide" class="guide"><div class="eyebrow">KEEP IT S
 <article><span>01</span><h3>Set the scene</h3><p>Describe the goal, constraints, and exactly what a correct answer looks like.</p></article>
 <article><span>02</span><h3>Bring your logic</h3><p>Paste a complete Python script or solve(input_data) function. Load the example to explore.</p></article>
 <article><span>03</span><h3>Read the evidence</h3><p>Inspect verified results from the sandboxed runner or explore sample edge cases.</p></article>
-</div></section><footer><div class="brand"><img class="brand-logo" src="data:image/svg+xml;base64,{logo_data}" alt="" width="32" height="32"> CaseCracker</div><span>Stay curious. Check the boundaries.</span><span>Secure sandboxed execution active</span></footer>''', unsafe_allow_html=True)
+</div></section><footer><div class="brand"><img class="brand-logo" src="data:image/svg+xml;base64,{logo_data}" alt="" width="32" height="32"> CaseCracker</div><span>Stay curious. Check the boundaries.</span><span>Execution status shown above</span></footer>''', unsafe_allow_html=True)
 
 # Mount after the page so the real workspace is visible behind the blur.
 render_intro()

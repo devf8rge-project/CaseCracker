@@ -24,6 +24,7 @@ class ExecutionLimits:
     max_output_bytes: int = 50 * 1024  # 50 KB limit on stdout/stderr
     max_file_size_bytes: int = 1024 * 1024  # 1 MB max file creation limit
     max_memory_bytes: int = 512 * 1024 * 1024
+    total_budget_seconds: float | None = None
 
 
 @dataclass(frozen=True)
@@ -180,9 +181,9 @@ def execute_code(
     stdin_input: str = "",
     limits: ExecutionLimits = ExecutionLimits(),
 ) -> ExecutionResult:
-    """Execute arbitrary Python code inside an isolated, sandboxed subprocess.
+    """Execute in a disposable hosted VM by default; local mode is opt-in.
 
-    Security & Reliability Guarantees:
+    Local engine behavior (also reused inside the hosted worker):
     1. Pre-execution static AST validation (catches syntax errors before spawning).
     2. macOS Seatbelt sandbox:
        - Network access completely denied (deny network*).
@@ -193,6 +194,18 @@ def execute_code(
     6. Truncated output to prevent memory exhaustion.
     7. Supports both standard `stdin/stdout` scripts and `solve(input_data)` functions.
     """
+    # The isolated worker executes the engine locally inside its disposable VM.
+    # Public deployments default to E2B and never silently fall back to the host.
+    if os.environ.get('CASECRACKER_ISOLATED_WORKER') != '1':
+        from casecracker.settings import setting
+        backend = setting('CASECRACKER_RUNNER_BACKEND', 'e2b')
+        if backend == 'e2b':
+            from casecracker.remote_runner import execute_remote
+            return execute_remote(code, stdin_input, limits)
+        if backend != 'local':
+            return ExecutionResult(False, '', 'Invalid runner backend; nothing executed.', False, None, 0,
+                                   error_message='Invalid runner backend.')
+
     # 1. Pre-execution static syntax validation
     valid_syntax, syn_err, syn_line = check_syntax(code)
     if not valid_syntax:

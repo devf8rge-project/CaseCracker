@@ -117,10 +117,10 @@ def _render_suite_summary(suite: TestSuiteResult) -> None:
     with c5:
         st.metric("Timed Out", suite.timeout_count)
 
-    sandbox_label = "macOS Seatbelt Sandbox Active" if suite.sandboxed else "Process Sandbox Active"
+    sandbox_label = "Isolated runner" if suite.sandboxed else "Local process limits"
     st.caption(
         f"⏱️ Total execution time: {suite.total_duration_ms:.1f} ms · "
-        f"🔒 {sandbox_label} (Network denied, isolated filesystem)"
+        f"🔒 {sandbox_label} (See configured backend for isolation details)"
     )
 
 

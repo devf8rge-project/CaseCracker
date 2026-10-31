@@ -1,3 +1,6 @@
+import os
+os.environ.setdefault('CASECRACKER_RUNNER_BACKEND', 'local')
+
 import json
 import time
 import unittest

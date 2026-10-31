@@ -159,7 +159,7 @@ def run_all_tests(
         timeout_count=timeouts,
         unverified_count=unverified,
         total_duration_ms=total_ms,
-        sandboxed=is_sandbox_available(),
+        sandboxed=bool(results) and all(result.sandboxed for result in results),
     )
 
 

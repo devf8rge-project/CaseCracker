@@ -10,8 +10,8 @@ from casecracker.runner import ExecutionLimits, execute_code, trace_code
 from casecracker.comparator import compare_outputs
 
 
-def compare_case(student_code, reference_code, test_input, *, timeout=1.0):
-    limits = ExecutionLimits(timeout_seconds=max(.01, timeout))
+def compare_case(student_code, reference_code, test_input, *, timeout=1.0, total_budget=None):
+    limits = ExecutionLimits(timeout_seconds=max(.01, timeout), total_budget_seconds=total_budget / 2 if total_budget else None)
     reference = execute_code(reference_code, test_input, limits)
     if not reference.success:
         return {"valid": False, "failed": False, "reason": "Reference rejected this input or could not finish.",
@@ -107,7 +107,7 @@ def shrink_failing_input(student_code, reference_code, failing_input_str, *, max
         remaining = deadline - time.monotonic()
         if remaining <= .04:
             return None
-        return compare_case(student_code, reference_code, text, timeout=min(.45, remaining / 2))
+        return compare_case(student_code, reference_code, text, timeout=min(.45, remaining / 2), total_budget=remaining)
     try:
         baseline = probe(original)
         if not baseline or not baseline["valid"] or not baseline["failed"]:

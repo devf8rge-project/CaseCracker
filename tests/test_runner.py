@@ -1,6 +1,9 @@
 """Comprehensive test suite for CaseCracker testing engine, runner, and comparator."""
 
 import os
+os.environ.setdefault('CASECRACKER_RUNNER_BACKEND', 'local')
+
+import os
 import unittest
 
 from casecracker.comparator import compare_outputs
