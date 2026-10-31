@@ -10,6 +10,25 @@ from casecracker.runner import ExecutionLimits, execute_code, trace_code
 from casecracker.comparator import compare_outputs
 
 
+def validate_reference_samples(reference_code, samples):
+    """Check a candidate against independent known answers, never its own outputs."""
+    if not samples or len(samples) > 20:
+        raise ValueError('Provide 1–20 examples with known expected outputs to check the generated reference.')
+    cases = []
+    for sample in samples:
+        if not all(isinstance(sample.get(k), str) for k in ('input', 'expected_output')):
+            raise ValueError('Each sample needs an input and a known expected output.')
+        if len(sample['input']) > 10000 or len(sample['expected_output']) > 10000:
+            raise ValueError('Keep each sample input and expected output under 10,000 characters.')
+        run = execute_code(reference_code, sample['input'], ExecutionLimits(timeout_seconds=1.0))
+        cases.append({'input': sample['input'], 'expected': sample['expected_output'],
+                      'actual': run.stdout, 'passed': run.success and compare_outputs(sample['expected_output'], run.stdout).matched,
+                      'error': run.error_message, 'sandboxed': run.sandboxed})
+    passed = sum(c['passed'] for c in cases)
+    return {'passed_count': passed, 'total_count': len(cases), 'samples_passed': passed == len(cases),
+            'sandboxed': all(c['sandboxed'] for c in cases), 'cases': cases}
+
+
 def compare_case(student_code, reference_code, test_input, *, timeout=1.0, total_budget=None):
     limits = ExecutionLimits(timeout_seconds=max(.01, timeout), total_budget_seconds=total_budget / 2 if total_budget else None)
     reference = execute_code(reference_code, test_input, limits)

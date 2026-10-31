@@ -23,6 +23,7 @@ from casecracker.owner_ui import render_owner_page
 from casecracker.samples import sample_result
 from casecracker.ui import render_results
 from casecracker.proof_ui import analyze_reference, render_proof_tools
+from casecracker.reference_ui import render_reference_generator, generated_reference_is_stale
 
 
 def load_example():
@@ -267,7 +268,8 @@ with workspace:
         with st.expander("Execution proof · reference solution & regression tests"):
             st.caption("Supply a trusted reference to enable automatic shrinking, traces, and optional AI patch verification. Reference code must reject inputs outside the problem constraints.")
             st.button("Load execution demo", on_click=load_proof_demo)
-            st.text_area("Trusted reference Python code", key="reference_code", height=220)
+            render_reference_generator()
+            st.text_area("Reference Python code", key="reference_code", height=220)
             st.text_area("Regression inputs (JSON array of stdin strings)", key="regression_inputs", height=90,
                          placeholder='["3\\n1 2 3", "1\\n-1"]')
             st.caption("AI analysis is optional and runs only when you request it.")
@@ -297,6 +299,8 @@ with workspace:
                 code_val = st.session_state.get("code", "").strip()
                 if not code_val:
                     raise ValueError("Add your Python code to continue.")
+                if generated_reference_is_stale():
+                    raise ValueError("Problem or examples changed. Generate the AI reference again first.")
                 with st.spinner("Comparing, shrinking, and recording bounded traces…"):
                     result, bundle = analyze_reference(
                         st.session_state.get("problem", "").strip(), code_val,
@@ -304,6 +308,9 @@ with workspace:
                         st.session_state.get("regression_inputs", ""),
                         suite_inputs=[tc.get("input", "") for tc in st.session_state.test_cases])
                 st.session_state.result, st.session_state.proof_bundle = result, bundle
+                saved_reference = st.session_state.get('generated_reference')
+                if saved_reference and saved_reference['reference_code'].strip() == st.session_state.reference_code.strip():
+                    bundle['reference_source'] = 'ai_generated'
             except Exception as exc:
                 st.error(f"Reference analysis unavailable: {exc}")
 

@@ -75,6 +75,8 @@ def render_proof_tools():
         return
     st.divider()
     st.subheader('Execution evidence')
+    if bundle.get('reference_source') == 'ai_generated':
+        st.warning('Compared against an AI-generated reference that passed known examples. Differences establish disagreement, not which solution is correct on unseen inputs.')
     st.caption('Evidence is relative to your supplied reference and tests, not a proof for every possible input. The reference must enforce valid input constraints.')
     report = bundle['report']
     st.write(f"Original suite: {report['passed_count']} / {report['total_count']} matched the reference.")

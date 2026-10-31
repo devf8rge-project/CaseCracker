@@ -243,3 +243,19 @@ python -m unittest discover -s tests -v
 ```
 
 Provider tests use deterministic fake responses; no paid LLM request is required.
+
+### Generate a reference without writing one
+
+In **Execution proof · reference solution & regression tests**, click
+**Generate reference from problem** after adding the full problem specification
+and at least one example with a known expected output (up to 20). Gemini receives
+the specification, not the student's code. The runner checks the generated
+candidate against those independent examples before filling the reference field.
+Failed candidates are shown but never replace an existing reference. Missing
+credentials, malformed output, and runner errors do not produce a passing badge.
+
+Passing examples is not a guarantee of correctness. Execution evidence against
+an AI-generated reference is labeled as disagreement with that candidate, rather
+than proof of which program is correct on unseen inputs. Changed problems or
+examples require regeneration before further reference analysis. These requests
+use the configured Gemini and runner services and incur their normal usage.

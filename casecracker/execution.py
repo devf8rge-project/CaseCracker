@@ -28,7 +28,7 @@ def extract_test_cases_from_problem(problem: str) -> list[TestCase]:
         return []
 
     pattern = re.compile(
-        r"(?:Example\s*(\d+)?:?\s*)?(?:Input|Sample Input|Example input)\s*:\s*\n?(.*?)\s*(?:Output|Sample Output|Expected output)\s*:\s*\n?(.*?)(?=(?:Example|\Z|Explanation|Constraints))",
+        r"(?:Example\s*(\d+)?:?\s*)?(?:Input|Sample Input|Example input)\s*:\s*\n?((?:(?!(?:Sample\s+|Example\s+)?Input\s*:|Constraints).)*?)\s*(?:Output|Sample Output|Expected output)\s*:\s*\n?(.*?)(?=(?:Example|\Z|Explanation|Constraints))",
         re.DOTALL | re.IGNORECASE,
     )
     matches = pattern.findall(problem)
