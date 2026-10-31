@@ -1,45 +1,165 @@
+/* =========================================================
+   Light-mode CSS palette & component overrides for CaseCracker
+   ========================================================= */
+
+/* ── CSS variable palette ── */
 :root, .stApp {
-  --midnight: #ffffff; --surface: #ffffff; --muted: #4c5870; --border: #ccd4e6;
-  --text-color: #162039; --background-color: #ffffff;
-  --secondary-background-color: #eaf0fb; --primary-color: #2454ff;
+  --midnight: #ffffff;
+  --surface: #f8fafc;
+  --muted: #475569;       /* Slate-600 – darkened for legibility */
+  --border: #cbd5e1;
+  --ink: #0f172a;         /* Slate-900 */
+  --text-color: #0f172a;
+  --background-color: #ffffff;
+  --secondary-background-color: #f1f5f9;
+  --primary-color: #2454ff;
+  /* theme-specific tokens */
+  --bg-surface: #ffffff;
+  --bg-input: #ffffff;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --border-color: #cbd5e1;
+  --code-bg: #f1f5f9;
+  --code-text: #0f172a;
+  --toast-bg: #ffffff;
+  --toast-text: #0f172a;
   color-scheme: only light !important;
 }
-html, body, #root { color-scheme: only light !important; background: #ffffff !important; color: #162039; }
-.stApp { background: #ffffff; color: #162039; }
-.brand { color: #162039 !important; }
-.hero h1, .hero h1 span, .workspace-heading h2, .guide h2, .guide-grid h3, .empty-result h3 { color: #162039; }
+
+/* ── Base colours ── */
+html, body, #root {
+  color-scheme: only light !important;
+  background: #ffffff !important;
+  color: var(--text-primary);
+}
+.stApp { background: var(--bg-surface); color: var(--text-primary); }
+
+/* ── Brand / nav ── */
+.brand { color: var(--text-primary) !important; }
 .eyebrow { color: #2548b8; }
 .beta, .language-tag { color: #3a4b70; border-color: #bac7e2; }
-.hero-tags, .panel-label, footer, .empty-status { color: #4c5870; }
 .dot { background: #527000; }
+.nav-caption, .hero-tags, .panel-label, footer, .empty-status { color: var(--text-secondary); }
+.nav-links a, a { color: #2448b5; }
+.nav-links a:hover { color: #132f83; }
+
+/* ── Headings ── */
+.hero h1, .hero h1 span, .workspace-heading h2, .guide h2, .guide-grid h3, .empty-result h3 { color: var(--text-primary); }
+
+/* ── Preview banner ── */
 .preview-banner { color: #344877; background: #e9eeff; border-color: #b1c2f7; border-left-color: #2454ff; }
 .preview-banner strong { color: #2548b8; }
-.guide-grid article, div[data-testid="stForm"] { background: #ffffff; border-color: #ccd4e6; }
+
+/* ── Guide grid / form cards ── */
+.guide-grid article, div[data-testid="stForm"] { background: #ffffff; border-color: var(--border-color); }
 .guide-grid article > span, .orbit span { color: #526e00; }
 .orbit { border-color: #9eb0e2; }
 .edge-tags span { color: #3a4b70; border-color: #c1cce1; background: #edf2fc; }
-.nav-links a, a { color: #2448b5; }
-.nav-links a:hover { color: #132f83; }
-div[data-testid="stTextArea"] textarea { background: #ffffff; color: #162039; caret-color: #2454ff; }
-div[data-testid="stTextArea"] textarea::placeholder { color: #64718a; }
-div[data-baseweb="textarea"], div[data-baseweb="input"] { background: #ffffff; border-color: #bac7df; }
-div[data-testid="stMarkdownContainer"], div[data-testid="stWidgetLabel"], div[data-testid="stCaptionContainer"], label, h1, h2, h3 { color: #162039; }
-div[data-testid="stCaptionContainer"] { color: #4c5870; }
-button[kind="secondary"], button[kind="tertiary"], div[data-testid="stDownloadButton"] button { background: #ffffff; color: #20365e; border-color: #bac7df; }
-button[kind="secondary"]:hover, div[data-testid="stDownloadButton"] button:hover { background: #e9eeff; border-color: #2454ff; color: #193cb3; }
-div[data-testid="stExpander"] details { background: #ffffff; border-color: #ccd4e6; color: #162039; }
-div[data-testid="stFileUploaderDropzone"] { background: #eaf0fb; color: #162039; }
-div[data-testid="stFileUploaderDropzone"] small { color: #4c5870; }
-div[data-testid="stCode"], div[data-testid="stCode"] pre, div[data-testid="stCode"] code { background: #edf1fa !important; color: #162039 !important; }
+
+/* ── Streamlit generic markdown / labels ── */
+div[data-testid="stMarkdownContainer"],
+div[data-testid="stWidgetLabel"],
+label, h1, h2, h3 { color: var(--text-primary); }
+div[data-testid="stCaptionContainer"] { color: var(--text-secondary) !important; }
+
+/* ── Alert box ── */
+div[data-testid="stAlert"] { color: var(--text-primary); background: #e9eeff; }
+div[data-testid="stAlert"] p { color: var(--text-primary); }
+
+/* ── Header ── */
+header[data-testid="stHeader"] { background: #ffffff; }
+header[data-testid="stHeader"] button { color: var(--text-primary); }
+
+/* ── Buttons ── */
+button[kind="secondary"], button[kind="tertiary"],
+div[data-testid="stDownloadButton"] button {
+  background: #ffffff; color: #20365e; border-color: #bac7df;
+}
+button[kind="secondary"]:hover,
+div[data-testid="stDownloadButton"] button:hover {
+  background: #e9eeff; border-color: #2454ff; color: #193cb3;
+}
+
+/* ── Expander ── */
+div[data-testid="stExpander"] details { background: #ffffff; border-color: var(--border-color); color: var(--text-primary); }
+div[data-testid="stExpander"] summary { color: var(--text-primary); }
+
+/* ── File uploader ── */
+div[data-testid="stFileUploaderDropzone"] { background: #f1f5f9; color: var(--text-primary); }
+div[data-testid="stFileUploaderDropzone"] small { color: var(--text-secondary); }
+
+/* ── Static code blocks ── */
+div[data-testid="stCode"], div[data-testid="stCode"] pre,
+div[data-testid="stCode"] code { background: #f1f5f9 !important; color: var(--text-primary) !important; }
+
+/* ── Inline code badges ── */
+.stMarkdown code, div[data-testid="stMarkdownContainer"] code,
+div[data-testid="stCaptionContainer"] code,
+p code, li code {
+  background: #ecfdf5 !important;
+  color: #065f46 !important;
+  border: 1px solid #a7f3d0 !important;
+  border-radius: 4px !important;
+  padding: 0.1em 0.35em !important;
+  font-weight: 500 !important;
+}
+
+/* ── Tabs ── */
 div[data-testid="stTabs"] button { color: #344877; }
 div[data-testid="stTabs"] button[aria-selected="true"] { color: #2448b5; }
-div[data-testid="stAlert"] { color: #162039; background: #e9eeff; }
-div[data-testid="stAlert"] p { color: #162039; }
-header[data-testid="stHeader"] { background: #ffffff; }
-header[data-testid="stHeader"] button { color: #162039; }
-::selection { background: #d3ed84; color: #162039; }
 
-/* Light mode uses white across the entire workspace, not only the page. */
+/* ── Radio toggle ── */
+div[data-testid="stRadio"] label:has(input:checked) { background: #ffffff; border-color: #a8b9eb; }
+
+/* ── Text inputs (single-line) ── */
+div[data-baseweb="input"] { background: #ffffff !important; border-color: var(--border-color) !important; }
+div[data-baseweb="input"] input {
+  background: #ffffff !important;
+  color: var(--text-primary) !important;
+  caret-color: #2454ff !important;
+}
+div[data-baseweb="input"] input::placeholder { color: #94a3b8 !important; }
+
+/* ── Text areas ── */
+div[data-baseweb="textarea"] { background: #ffffff !important; border-color: var(--border-color) !important; }
+div[data-testid="stTextArea"] textarea {
+  background: #ffffff !important;
+  color: var(--text-primary) !important;
+  caret-color: #2454ff !important;
+}
+div[data-testid="stTextArea"] textarea::placeholder { color: #94a3b8 !important; }
+
+/* ── Toast popup ── */
+div[data-testid="stToast"],
+.stToast {
+  background: var(--toast-bg) !important;
+  background-color: var(--toast-bg) !important;
+  color: var(--toast-text) !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.10) !important;
+}
+div[data-testid="stToast"] *,
+div[data-testid="stToastText"],
+div[data-testid="stToastText"] p,
+.stToast p, .stToast span, .stToast div {
+  color: var(--toast-text) !important;
+}
+
+/* ── Tooltip popups ── */
+[data-testid="stTooltipContent"],
+.stTooltipContent,
+[role="tooltip"],
+[data-baseweb="tooltip"] div,
+[data-baseweb="popover"] div {
+  background: #0f172a !important;
+  color: #ffffff !important;
+  font-weight: 500 !important;
+  border-radius: 6px !important;
+}
+/* Hover target wrapper should stay transparent */
+.stTooltipHoverTarget { background: transparent !important; }
+
+/* ── White washes – force light surface across all containers ── */
 .stApp, div[data-testid="stAppViewContainer"], section[data-testid="stMain"],
 header[data-testid="stHeader"], div[data-testid="stMainBlockContainer"],
 div[data-testid="stVerticalBlockBorderWrapper"] > div,
@@ -51,16 +171,17 @@ div[data-testid="stTextArea"] textarea,
   background: #ffffff !important;
   background-image: none !important;
 }
-div[data-testid="stCode"], div[data-testid="stCode"] pre,
-div[data-testid="stCode"] code, div[data-testid="stAlert"] {
-  background: #ffffff !important;
-}
 
-/* Light palette for the compact comparison card and real result metrics. */
-:root, .stApp { --ink: #162039; }
+/* hero example card */
 .hero-example { background: #ffffff; border-color: #bbc8e8; box-shadow: 0 16px 40px #18284b0a; }
 .code-blue { color: #2548b8; }
 .code-lime { color: #4c6500; }
 .example-outputs .wrong-output { color: #aa2443; }
-.current-step, .stat strong, .example-outputs strong { color: #162039; }
-div[data-testid="stRadio"] label:has(input:checked) { background: #ffffff; border-color: #a8b9eb; }
+.current-step, .stat strong, .example-outputs strong { color: var(--text-primary); }
+
+/* ── Ace editor gutter fix ── */
+.ace_gutter { background: #f1f5f9 !important; border-right: 1px solid #e2e8f0 !important; }
+.ace_gutter-cell { color: #64748b !important; }
+
+/* ── Selection ── */
+::selection { background: #d3ed84; color: #162039; }
