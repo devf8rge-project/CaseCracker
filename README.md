@@ -102,7 +102,7 @@ real keys. Do not paste keys into chat or commit them to GitHub.
 GEMINI_API_KEY = "your-ai-key"
 E2B_API_KEY = "your-sandbox-key"
 CASECRACKER_RUNNER_BACKEND = "e2b"
-CASECRACKER_LLM_MODEL = "gemini-flash-latest"
+CASECRACKER_LLM_MODEL = "gemini-3.1-flash-lite"
 ```
 
 Get keys from [Google AI Studio](https://aistudio.google.com/apikey) and the
@@ -179,11 +179,11 @@ Set these in environment variables or `.streamlit/secrets.toml` (never commit ke
 
 ```toml
 GEMINI_API_KEY = "your-key"
-CASECRACKER_LLM_MODEL = "gemini-flash-latest"
+CASECRACKER_LLM_MODEL = "gemini-3.1-flash-lite"
 ```
 
 The adapter in `casecracker/ai_helper.py` uses Google's
-[generateContent API](https://ai.google.dev/api/generate-content).
+[Interactions API](https://ai.google.dev/api/interactions-api).
 `generate_verified_patch(student_code, reference_code, failing_input,
 trace_divergence, check_fn)` proposes a one-line change and invokes
 `check_fn(patched_code)` before returning verification. The checker callback must

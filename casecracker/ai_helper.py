@@ -16,21 +16,27 @@ import urllib.request
 
 def make_llm(api_key=None, model=None):
     api_key = api_key or os.environ.get('GEMINI_API_KEY')
-    model = model or os.environ.get('CASECRACKER_LLM_MODEL', 'gemini-flash-latest')
+    model = model or os.environ.get('CASECRACKER_LLM_MODEL', 'gemini-3.1-flash-lite')
     if not api_key:
         raise ValueError('AI is not configured. Add GEMINI_API_KEY to server secrets or environment.')
     if not re.fullmatch(r'[a-zA-Z0-9._-]+', model):
         raise ValueError('Invalid model name.')
     def generate(prompt):
         request = urllib.request.Request(
-            f'https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent',
-            data=json.dumps({'contents': [{'parts': [{'text': prompt}]}],
-                             'generationConfig': {'responseMimeType': 'application/json', 'temperature': 0}}).encode(),
+            'https://generativelanguage.googleapis.com/v1beta/interactions',
+            data=json.dumps({'model': model, 'input': prompt, 'store': False, 'stream': False,
+                             'response_format': {'type': 'text', 'mime_type': 'application/json'},
+                             'generation_config': {'thinking_level': 'low'}}).encode(),
             headers={'Content-Type': 'application/json', 'x-goog-api-key': api_key}, method='POST')
         try:
             with urllib.request.urlopen(request, timeout=45) as response:
                 data = json.loads(response.read(512_000))
-            text = ''.join(p.get('text', '') for p in data['candidates'][0]['content']['parts'])
+            interaction = data.get('interaction', data)
+            if interaction.get('status') not in (None, 'completed'):
+                raise ValueError('Incomplete model response')
+            text = ''.join(part.get('text', '') for step in interaction.get('steps', [])
+                           if step.get('type') == 'model_output' for part in step.get('content', [])
+                           if part.get('type') == 'text')
             output = json.loads(text)
             if not isinstance(output, dict):
                 raise ValueError('Expected a JSON object.')
