@@ -18,17 +18,18 @@ def parse_suite(raw):
     return values
 
 
-def analyze_reference(problem, student, reference, custom_input, extra_tests):
+def analyze_reference(problem, student, reference, custom_input, extra_tests, *, suite_inputs=None):
     inputs = parse_suite(extra_tests)
     if custom_input:
         inputs.insert(0, custom_input)
-    inputs.extend(inp for inp, _ in extract_test_cases_from_problem(problem))
+    inputs.extend(suite_inputs or [])
+    inputs.extend(case.input for case in extract_test_cases_from_problem(problem))
     inputs = list(dict.fromkeys(inputs))
     if not inputs or len(inputs) > 20:
         raise ValueError('Provide 1–20 total distinct test inputs through custom input, problem samples, or regression tests.')
     report = check_suite(student, reference, inputs)
     bundle = {'student': student, 'reference': reference, 'inputs': inputs, 'report': report,
-              'problem': problem, 'custom_input': custom_input, 'extra_tests': extra_tests}
+              'problem': problem, 'custom_input': custom_input, 'extra_tests': extra_tests, 'ui_test_inputs': suite_inputs}
     failure = next((c for c in report['cases'] if c['valid'] and c['failed']), None)
     if failure:
         reduced = shrink_failing_input(student, reference, failure['input'])
@@ -82,7 +83,7 @@ def render_proof_tools():
     stale = (bundle['student'] != st.session_state.get('code', '').strip() or
              bundle['reference'] != st.session_state.get('reference_code', '').strip() or
              bundle['problem'] != st.session_state.get('problem', '').strip() or
-             bundle['custom_input'] != st.session_state.get('custom_input', '') or
+             (bundle['ui_test_inputs'] is not None and bundle['ui_test_inputs'] != [tc.get('input', '') for tc in st.session_state.get('test_cases', [])]) or
              bundle['extra_tests'] != st.session_state.get('regression_inputs', ''))
     if stale:
         st.warning('Code or tests have changed. This evidence belongs to the last submission. Submit again before requesting AI analysis.')

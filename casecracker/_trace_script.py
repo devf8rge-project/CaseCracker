@@ -10,6 +10,7 @@ import math
 import sys
 
 SOURCE = __SOURCE_LITERAL__
+HARNESS = __HARNESS_LITERAL__
 steps = []
 lines = SOURCE.splitlines()
 truncated = False
@@ -77,6 +78,12 @@ try:
     sys.settrace(snapshot)
     namespace = {'__name__': '__main__'}
     exec(compile(SOURCE, '<submitted>', 'exec'), namespace, namespace)
+    if HARNESS is not None:
+        import types
+        target = types.ModuleType('_trace_target')
+        target.__dict__.update(namespace)
+        sys.modules['_trace_target'] = target
+        exec(HARNESS, {'__file__': __file__})
 except BaseException as exc:
     if not (isinstance(exc, SystemExit) and exc.code in (None, 0)):
         error = type(exc).__name__

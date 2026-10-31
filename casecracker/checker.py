@@ -7,6 +7,7 @@ import math
 import time
 
 from casecracker.runner import ExecutionLimits, execute_code, trace_code
+from casecracker.comparator import compare_outputs
 
 
 def compare_case(student_code, reference_code, test_input, *, timeout=1.0):
@@ -16,7 +17,7 @@ def compare_case(student_code, reference_code, test_input, *, timeout=1.0):
         return {"valid": False, "failed": False, "reason": "Reference rejected this input or could not finish.",
                 "reference": asdict(reference), "student": None}
     student = execute_code(student_code, test_input, limits)
-    return {"valid": True, "failed": not student.success or student.stdout.rstrip() != reference.stdout.rstrip(),
+    return {"valid": True, "failed": not student.success or not compare_outputs(reference.stdout, student.stdout).matched,
             "expected": reference.stdout.rstrip(), "actual": student.stdout.rstrip(),
             "error": student.stderr if not student.success else "",
             "sandboxed": reference.sandboxed and student.sandboxed,

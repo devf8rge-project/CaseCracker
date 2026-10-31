@@ -82,6 +82,17 @@ class ProofTests(unittest.TestCase):
         timed = trace_code('while True: pass', timeout_seconds=.15)
         self.assertTrue(timed['timed_out'])
 
+    def test_solve_function_trace_and_normalized_comparison(self):
+        reference = 'def solve(x):\n    total = x * 2\n    return total\n'
+        student = reference.replace('x * 2', 'x + 1')
+        report = check_suite(student, reference, ['4'])
+        self.assertFalse(report['is_verified'])
+        trace = trace_execution_divergence(student, reference, '4')
+        self.assertTrue(any('x' in step['locals'] for step in trace['student_steps']))
+        self.assertIsNotNone(trace['first_divergence'])
+        normalized = check_suite('print("[1, 2]")', 'print("[1,2]")', [''])
+        self.assertTrue(normalized['is_verified'])
+
     def test_patch_retries_on_real_failed_suite(self):
         # First proposal changes one line but remains wrong for negatives.
         wrong = STUDENT.replace('total += max(value, 0)', 'total += abs(value)')

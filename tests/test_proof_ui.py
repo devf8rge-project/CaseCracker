@@ -8,7 +8,7 @@ class ProofUITests(unittest.TestCase):
         app = AppTest.from_file('app.py', default_timeout=30).run()
         self.assertFalse(app.exception)
         next(b for b in app.button if b.label == 'Load execution demo').click().run()
-        next(b for b in app.button if b.label == 'Find failing test →').click().run()
+        next(b for b in app.button if 'Find failing test' in b.label).click().run()
         self.assertFalse(app.exception)
         bundle = app.session_state['proof_bundle']
         self.assertTrue(bundle['shrink']['is_failure'])
@@ -32,12 +32,12 @@ class ProofUITests(unittest.TestCase):
         app = AppTest.from_file('app.py', default_timeout=30).run()
         next(b for b in app.button if b.label == 'Load execution demo').click().run()
         next(t for t in app.text_area if t.label == 'Regression inputs (JSON array of stdin strings)').input('{bad').run()
-        next(b for b in app.button if b.label == 'Find failing test →').click().run()
+        next(b for b in app.button if 'Find failing test' in b.label).click().run()
         self.assertFalse(app.exception)
         self.assertTrue(app.error)
 
         next(b for b in app.button if b.label == 'Load execution demo').click().run()
-        next(b for b in app.button if b.label == 'Find failing test →').click().run()
+        next(b for b in app.button if 'Find failing test' in b.label).click().run()
         with patch('casecracker.proof_ui._provider', side_effect=ValueError('AI is not configured.')):
             next(b for b in app.button if b.label == 'Generate and verify a one-line patch').click().run()
         self.assertFalse(app.exception)
